@@ -1,0 +1,254 @@
+.event-list {
+	margin-top: 20px;
+	margin-left: 415px;
+	background-color: #6161fa;
+	width: 1080px;
+	height: 1000px;
+	border-radius: 10px;
+	border: grey 3px solid;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+	overflow-y: auto;
+}
+
+.event-title {
+	margin-left: 10px;
+	color: #fff;
+}
+
+.elem-description {
+	margin-left: 20px;
+
+	width: 400px;
+}
+
+.none-ul {
+	list-style: none;
+	padding: 0; /* Убираем внутренний отступ у ul */
+	margin: 0; /* Убираем внешний отступ у ul */
+}
+
+.none-ul li {
+	margin-bottom: 10px; /* Добавляем отступ между элементами li */
+}
+
+.all-items {
+	display: flex;
+	background-color: #fff;
+	border: grey 3px solid;
+	border-radius: 10px;
+	padding: 10px 10px;
+	margin: 10px 10px;
+}
+
+.close-panel-button {
+	margin-top: 112px;
+	font-family: 'RobotoM';
+	font-size: 16px;
+	justify-content: center;
+	display: flex;
+	align-items: center;
+	width: 130px;
+	height: 45px;
+	background-color: #6161fa00;
+
+	color: white;
+
+	font-size: 16px;
+	border: none;
+
+	z-index: 1;
+	margin-left: 1060px;
+}
+
+.button-event-edit {
+	font-family: 'RobotoM';
+	font-size: 16px;
+	justify-content: center;
+	display: flex;
+	align-items: center;
+	width: 130px;
+	height: 45px;
+	background-color: #6161fa;
+	color: white;
+	border-radius: 5px;
+	font-size: 16px;
+	border: none;
+
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+	margin-right: 10px;
+}
+
+.button-group {
+	margin-left: -6px;
+	justify-content: left;
+	display: flex;
+}
+
+.div-group-title {
+	display: flex;
+}
+
+.two-parts-events-edit {
+	display: flex;
+}
+
+.one-of-part-events-edit {
+	max-width: 500px;
+}
+
+/* AdminPage.css */
+.modal {
+	background-color: white;
+	padding: 20px;
+	border-radius: 5px;
+	min-width: 1200px;
+
+	position: fixed; /* Изменено на fixed */
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1000; /* Установите более высокий z-index */
+}
+
+.margin-top {
+	margin-top: 90px;
+}
+.overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.75);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 999; /* Установите z-index для оверлея */
+}
+
+/* Добавьте стили для каждого элемента */
+.label-title,
+.label-event-type,
+.label-event-kind,
+.label-start-date,
+.label-end-date,
+.label-status,
+.label-departments,
+.label-notified-users {
+	width: 200px;
+	display: block;
+	margin-bottom: 10px;
+	font-size: 18px;
+}
+
+.label-description {
+	margin: 0px 10px;
+	width: 100px;
+	display: block;
+	font-size: 18px;
+}
+
+.input-title,
+.input-event-type,
+.input-event-kind,
+.input-start-date,
+.input-end-date,
+.input-status,
+.input-notified-users,
+.input-departments {
+	padding: 10px;
+	height: auto;
+	font-size: 14px;
+	border-radius: 10px;
+	border: 2px solid #6161fa;
+
+	background: rgba(255, 255, 255, 0.5);
+	color: #333;
+	max-width: 200px;
+	left: 25%;
+}
+
+.input-title:focus,
+.input-event-type:focus,
+.input-event-kind:focus,
+.input-start-date:focus,
+.input-end-date:focus,
+.input-status:focus,
+.input-notified-users:focus,
+.input-departments:focus {
+	border-color: rgba(40, 167, 69, 1) !important; /* Увеличиваем специфичность */
+}
+
+.input-description {
+	padding: 10px;
+	height: auto;
+	font-size: 16px;
+	border-radius: 10px;
+	border: 2px solid #6161fa;
+	background: rgba(255, 255, 255, 0.5);
+	color: #333;
+	min-width: 300px;
+	left: 25%;
+}
+
+.input-description-create {
+	margin-left: 40px;
+	padding: 10px;
+	height: auto;
+	font-size: 16px;
+	border-radius: 10px;
+	border: 2px solid #6161fa;
+	background: rgba(255, 255, 255, 0.5);
+	color: #333;
+	min-width: 500px;
+	left: 25%;
+}
+
+.input-description-create:focus {
+	border-color: rgba(40, 167, 69, 1) !important; /* Увеличиваем специфичность */
+}
+
+.flex-items {
+	vertical-align: middle;
+	display: flex;
+	padding: 10px;
+	margin: 5px 0px;
+	border-radius: 10px;
+	border: 2px solid #6161fa;
+}
+
+.create-event-button {
+	margin-top: 15px;
+	margin-left: 600px;
+	font-family: 'RobotoM';
+	font-size: 16px;
+	justify-content: center;
+	display: flex;
+	align-items: center;
+	width: 130px;
+	height: 45px;
+	color: black;
+	border-radius: 5px;
+	font-size: 16px;
+	border: none;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1; /* Убедитесь, что этот z-index ниже, чем у модального окна */
+	margin-right: 10px;
+}
+
+.close-button {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	background: none;
+	border: none;
+	font-size: 30px;
+	cursor: pointer;
+	color: #333;
+}
+
+.close-button:hover {
+	color: #6161fa;
+}

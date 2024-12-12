@@ -1,0 +1,179 @@
+@font-face {
+	font-family: 'RobotoM';
+	src: url(../fonts/Roboto/Roboto-Medium.ttf);
+}
+
+@font-face {
+	font-family: 'RobotoB';
+	src: url(../fonts/Roboto/Roboto-Bold.ttf);
+}
+
+@font-face {
+	font-family: 'RobotoL';
+	src: url(../fonts/Roboto/Roboto-Light.ttf);
+}
+
+@font-face {
+	font-family: 'RobotoT';
+	src: url(../fonts/Roboto/Roboto-Thin.ttf);
+}
+
+.app {
+	background: #6161fa;
+	width: 220px;
+	height: 400px;
+	margin: 0 auto;
+	border: 1px solid #ccc;
+	overflow-y: auto;
+	border-radius: 7px;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+}
+
+.button-group {
+	padding: 5px;
+	margin-left: 10px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.todo-list,
+.favorite-list {
+	margin-top: 10px;
+}
+
+.todo-item {
+	border: 3px solid #b3b3b3;
+	margin: 5px;
+	border-radius: 7px;
+	background-color: #fff;
+	font-weight: 300;
+	color: #6161fa;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: flex-start;
+	padding: 3px;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+	transition: background-color 0.5s ease; /* Добавляем переход для фона */
+}
+
+.todo-item.favorite {
+	background-color: #b2ff59; /* Салатовый цвет */
+	transition: background-color 0.3s ease, transform 0.3s ease; /* Добавляем переходы */
+}
+
+button {
+	cursor: pointer;
+	transition: transform 0.2s ease-in-out;
+}
+
+button:hover {
+	transform: scale(1.02);
+}
+
+.margin {
+	padding: 5px;
+}
+
+.list-button,
+.favorite-button {
+	color: white;
+	background: none;
+	border: none;
+	font-size: 18px;
+}
+
+.list-button.active,
+.favorite-button.active {
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+.add_to_favorite {
+	margin: 2px;
+	opacity: 0.5; /* Значение от 0 до 1 */
+	border: none;
+	width: 19px;
+	height: 19px;
+	background: url('../images/pngwing.com.png') no-repeat center center;
+	background-size: cover;
+	transition: transform 0.3s ease, filter 0.3s ease, opacity 0.3s ease; /* Добавляем переходы */
+	margin-bottom: 3px;
+}
+
+/* При наведении увеличиваем масштаб и делаем изображение более непрозрачным */
+.add_to_favorite:hover {
+	transform: scale(1.1); /* Увеличиваем масштаб */
+	opacity: 1; /* Делаем изображение более непрозрачным */
+	filter: brightness(1.2); /* Добавляем яркости */
+}
+
+.delete_to_favorite {
+	border: none;
+	width: 19px;
+	height: 19px;
+	background: url('../images/close.png');
+	background-size: cover;
+	background-position: center;
+	transition: transform 0.3s ease, filter 0.3s ease;
+	margin-bottom: 5px;
+}
+
+.delete_to_favorite:hover {
+	transform: scale(1.1); /* Увеличиваем масштаб */
+	opacity: 1; /* Делаем изображение более непрозрачным */
+	filter: brightness(1.2);
+}
+
+.right-date-button {
+	margin-top: -2px;
+	background: url('../images/right_button.png');
+	background-size: cover;
+	background-position: center;
+	height: 29px;
+	border: none;
+	width: 20px;
+}
+.left-date-button {
+	background: url('../images/left_button.png');
+	background-size: cover;
+	background-position: center;
+	height: 29px;
+	border: none;
+
+	width: 20px;
+}
+
+.date-navigation {
+	font-size: 18px;
+	display: flex;
+	justify-content: center;
+}
+
+/* work_list.css */
+.text-button-date {
+	margin-top: -2px;
+	padding: 0px 10px;
+	font-size: 22px !important; /* Используем !important для принудительного применения */
+	color: #fff;
+}
+
+.span-description {
+	width: 183px;
+}
+
+.date-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+}
+
+.date {
+	font-size: 12px;
+	color: #888;
+}
