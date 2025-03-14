@@ -1,132 +1,149 @@
-import React, { useState, useEffect } from 'react'
-import axios from 'axios'
-import TodoList from './TodoList'
-import FavoriteList from './FavoriteList'
-import './work_list.css'
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import TodoList from "./TodoList";
+import FavoriteList from "./FavoriteList";
+import "./work_list.css";
 
 const WorkList = ({
-	onEventClick,
-	currentDate,
-	onDateSelect,
-	isCalendarOpen,
-	toggleCalendar,
+  onEventClick,
+  currentDate,
+  onDateSelect,
+  isCalendarOpen,
+  toggleCalendar,
 }) => {
-	const [todos, setTodos] = useState([])
-	const [favorites, setFavorites] = useState([])
-	const [showFavorites, setShowFavorites] = useState(false)
+  const [todos, setTodos] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [showFavorites, setShowFavorites] = useState(false);
 
-	useEffect(() => {
-		fetchEvents(currentDate)
-		restoreFavorites()
-	}, [currentDate])
+  // Загрузка событий при изменении currentDate
+  useEffect(() => {
+    fetchEvents(currentDate);
+  }, [currentDate]);
 
-	const fetchEvents = async date => {
-		try {
-			// Вычитаем один день из текущей даты
-			const adjustedDate = new Date(date)
-			adjustedDate.setDate(adjustedDate.getDate() + 0)
-			const formattedDate = adjustedDate.toISOString().split('T')[0] // Форматируем дату в формат YYYY-MM-DD
-			const response = await axios.get(
-				`http://localhost:3000/events?start_date=${formattedDate}`
-			)
-			const events = response.data.map(event => ({
-				...event,
-				isFavorite: false, // Добавляем поле isFavorite в данные
-				date: event.date || formattedDate, // Добавляем дату, если она отсутствует
-			}))
-			setTodos(events)
-		} catch (error) {
-			console.error('Error fetching events', error)
-		}
-	}
+  // Загрузка избранного из localStorage при монтировании компонента
+  useEffect(() => {
+    const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    setFavorites(storedFavorites);
+  }, []);
 
-	const toggleFavorite = index => {
-		if (index < 0 || index >= todos.length) {
-			console.error('Invalid index:', index)
-			return
-		}
+  // Функция для загрузки событий
+  const fetchEvents = async (date) => {
+    try {
+      const adjustedDate = new Date(date);
+      adjustedDate.setDate(adjustedDate.getDate());
+      const formattedDate = adjustedDate.toISOString().split("T")[0];
 
-		const updatedTodos = [...todos]
-		const todo = updatedTodos[index]
-		todo.isFavorite = !todo.isFavorite
+      const response = await axios.get(
+        `http://localhost:3000/events?event_date=${formattedDate}`
+      );
 
-		if (todo.isFavorite) {
-			setFavorites([...favorites, todo])
-		} else {
-			setFavorites(favorites.filter(fav => fav.id !== todo.id))
-		}
+      // Обработка данных: добавляем isFavorite, если его нет
+      const events = response.data.map((event) => ({
+        ...event,
+        isFavorite: event.isFavorite || false,
+        date: event.date || formattedDate,
+      }));
 
-		setTodos(updatedTodos)
-		saveFavorites()
-	}
+      setTodos(events);
+      restoreFavorites(events); // Восстанавливаем избранное
+    } catch (error) {
+      console.error("Error fetching events", error);
+    }
+  };
 
-	const goToPreviousDay = () => {
-		const previousDay = new Date(currentDate)
-		previousDay.setDate(previousDay.getDate() - 1)
-		onDateSelect(previousDay)
-	}
+  // Переключение избранного
+  const toggleFavorite = (id) => {
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, isFavorite: !todo.isFavorite } : todo
+    );
 
-	const goToNextDay = () => {
-		const nextDay = new Date(currentDate)
-		nextDay.setDate(nextDay.getDate() + 1)
-		onDateSelect(nextDay)
-	}
+    const todo = updatedTodos.find((todo) => todo.id === id);
+    if (!todo) return; // Если todo не найден, выходим
 
-	const saveFavorites = () => {
-		localStorage.setItem('favorites', JSON.stringify(favorites))
-	}
+    if (todo.isFavorite) {
+      setFavorites((prevFavorites) => [...prevFavorites, todo]);
+    } else {
+      setFavorites((prevFavorites) =>
+        prevFavorites.filter((fav) => fav.id !== id)
+      );
+    }
 
-	const restoreFavorites = () => {
-		const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || []
-		setFavorites(storedFavorites)
+    setTodos(updatedTodos);
+    saveFavorites();
+  };
 
-		// Обновляем состояние todos, чтобы отобразить избранные элементы
-		const updatedTodos = todos.map(todo => {
-			const isFavorite = storedFavorites.some(fav => fav.id === todo.id)
-			return { ...todo, isFavorite }
-		})
-		setTodos(updatedTodos)
-	}
+  // Сохранение избранного в localStorage
+  const saveFavorites = () => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  };
 
-	return (
-		<div className='app'>
-			<div className='button-group'>
-				<button
-					className={`list-button ${!showFavorites ? 'active' : ''}`}
-					onClick={() => setShowFavorites(false)}
-				>
-					Список
-				</button>
-				<button
-					className={`favorite-button ${showFavorites ? 'active' : ''}`}
-					onClick={() => setShowFavorites(true)}
-				>
-					Избранное
-				</button>
-			</div>
-			<div className='date-navigation'>
-				<button className='left-date-button' onClick={goToPreviousDay}></button>
-				<div className='text-button-date' onClick={toggleCalendar}>
-					{currentDate.toLocaleDateString('ru-RU')}
-				</div>
-				<button className='right-date-button' onClick={goToNextDay}></button>
-			</div>
+  // Восстановление избранного
+  const restoreFavorites = (events) => {
+    const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
-			{showFavorites ? (
-				<FavoriteList
-					favorites={favorites}
-					onToggleFavorite={toggleFavorite}
-					onEventClick={onEventClick}
-				/>
-			) : (
-				<TodoList
-					todos={todos}
-					onToggleFavorite={toggleFavorite}
-					onEventClick={onEventClick}
-				/>
-			)}
-		</div>
-	)
-}
+    // Обновляем todos, чтобы отобразить избранные элементы
+    const updatedTodos = events.map((event) => {
+      const isFavorite = storedFavorites.some((fav) => fav.id === event.id);
+      return { ...event, isFavorite };
+    });
 
-export default WorkList
+    setTodos(updatedTodos);
+  };
+
+  // Переход к предыдущему дню
+  const goToPreviousDay = () => {
+    const previousDay = new Date(currentDate);
+    previousDay.setDate(previousDay.getDate() - 1);
+    onDateSelect(previousDay);
+  };
+
+  // Переход к следующему дню
+  const goToNextDay = () => {
+    const nextDay = new Date(currentDate);
+    nextDay.setDate(nextDay.getDate() + 1);
+    onDateSelect(nextDay);
+  };
+
+  return (
+    <div className="app">
+      <div className="button-group">
+        <button
+          className={`list-button ${!showFavorites ? "active" : ""}`}
+          onClick={() => setShowFavorites(false)}
+        >
+          Список
+        </button>
+        <button
+          className={`favorite-button ${showFavorites ? "active" : ""}`}
+          onClick={() => setShowFavorites(true)}
+        >
+          Избранное
+        </button>
+      </div>
+
+      <div className="date-navigation">
+        <button className="left-date-button" onClick={goToPreviousDay}></button>
+        <div className="text-button-date" onClick={toggleCalendar}>
+          {currentDate.toLocaleDateString("ru-RU")}
+        </div>
+        <button className="right-date-button" onClick={goToNextDay}></button>
+      </div>
+
+      {showFavorites ? (
+        <FavoriteList
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          onEventClick={onEventClick}
+        />
+      ) : (
+        <TodoList
+          todos={todos}
+          onToggleFavorite={toggleFavorite}
+          onEventClick={onEventClick}
+        />
+      )}
+    </div>
+  );
+};
+
+export default WorkList;

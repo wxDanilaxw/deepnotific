@@ -1,173 +1,195 @@
 @font-face {
-	font-family: 'RobotoM';
-	src: url(../fonts/Roboto/Roboto-Medium.ttf);
+  font-family: "RobotoM";
+  src: url(../fonts/Roboto/Roboto-Medium.ttf);
 }
 
 @font-face {
-	font-family: 'RobotoB';
-	src: url(../fonts/Roboto/Roboto-Bold.ttf);
+  font-family: "RobotoB";
+  src: url(../fonts/Roboto/Roboto-Bold.ttf);
 }
 
 @font-face {
-	font-family: 'RobotoL';
-	src: url(../fonts/Roboto/Roboto-Light.ttf);
+  font-family: "RobotoL";
+  src: url(../fonts/Roboto/Roboto-Light.ttf);
 }
 
 @font-face {
-	font-family: 'RobotoT';
-	src: url(../fonts/Roboto/Roboto-Thin.ttf);
+  font-family: "RobotoT";
+  src: url(../fonts/Roboto/Roboto-Thin.ttf);
 }
 body {
-	background: url('../images/background.png');
-	background-size: cover;
-	background-position: center;
-	height: 100vh;
-	width: 96vw;
+  background: url("../images/background.png");
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  width: 96vw;
 }
 
 .list-banner {
-	margin: 0px 37px 0px 1650px;
+  margin: 0px 37px 0px 1650px;
 }
 
 .text-button-date {
-	font-size: 18px;
-	padding: 0px 15px;
+  font-size: 18px;
+  padding: 0px 15px;
 }
 
 .calendar-button {
-	font-family: 'RobotoM';
-	font-size: 16px;
-	margin-top: 80px;
-	justify-content: center;
-	display: flex;
-	align-items: center;
-	width: 220px;
-	height: 45px;
-	background-color: #6161fa;
-	color: white;
-	border-radius: 5px;
-	font-size: 16px;
-	border: none;
-	margin-bottom: 5px;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 1;
+  font-family: "RobotoM";
+  font-size: 16px;
+  margin-top: 80px;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  width: 220px;
+  height: 45px;
+  background-color: #6161fa;
+  color: white;
+  border-radius: 5px;
+  font-size: 16px;
+  border: none;
+  margin-bottom: 5px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
 table {
-	border-collapse: collapse;
-	background: white;
-	color: black;
+  border-collapse: collapse;
+  background: white;
+  color: black;
 }
 
 th,
 td {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .join-button {
-	position: fixed;
-	color: #292828;
-	background-color: #6161fa;
-	border: none;
-	margin-top: 111px;
-	margin-left: 1551px;
-	width: 40px;
-	height: 19px;
-	font-size: 16px;
-	font-family: 'RobotoM';
-	font-style: italic;
-	background-size: cover;
-	background-position: center;
-	transition: transform 0.2s ease, filter 0.2s ease;
+  position: fixed;
+  color: #292828;
+  background-color: #6161fa;
+  border: none;
+  margin-top: 111px;
+  margin-left: 1551px;
+  width: 40px;
+  height: 19px;
+  font-size: 16px;
+  font-family: "RobotoM";
+  font-style: italic;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .logout-button {
-	position: fixed;
-	color: #292828;
-	background-color: #6161fa;
-	border: none;
-	margin-top: 111px;
-	margin-left: 1500px;
-	width: 60px;
-	height: 19px;
-	font-size: 16px;
-	font-family: 'RobotoM';
-	font-style: italic;
-	background-size: cover;
-	background-position: center;
-	transition: transform 0.2s ease, filter 0.2s ease;
+  position: fixed;
+  color: #292828;
+  background-color: #6161fa;
+  border: none;
+  margin-top: 111px;
+  margin-left: 1500px;
+  width: 60px;
+  height: 19px;
+  font-size: 16px;
+  font-family: "RobotoM";
+  font-style: italic;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 /* Кнопка выпадающего списка */
 .dropbtn {
-	position: fixed;
-	color: #292828;
-	background-color: #6161fa;
-	border: none;
-	margin-top: 95px;
-	margin-left: 1530px;
-	width: auto;
-	height: 19px;
-	font-size: 14px;
-	font-family: 'RobotoM';
-	font-style: italic;
-	background-size: cover;
-	background-position: center;
-	transition: transform 0.2s ease, filter 0.2s ease;
+  position: fixed;
+  color: #292828;
+  background-color: #6161fa;
+  border: none;
+  margin-top: 95px;
+  margin-left: 1530px;
+  width: auto;
+  height: 19px;
+  font-size: 14px;
+  font-family: "RobotoM";
+  font-style: italic;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 /* Контейнер <div> - необходим для размещения выпадающего содержимого */
 .dropdown {
-	position: relative;
-	display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
 /* Выпадающее содержимое (скрыто по умолчанию) */
 .dropdown-content {
-	font-size: 14px;
-	font-family: 'RobotoL';
-	border-radius: 5px;
-	margin-top: 115px;
-	margin-left: 1470px;
-	display: none;
-	position: absolute;
-	background-color: #f1f1f1;
-	width: 158px;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 1;
+  font-size: 14px;
+  font-family: "RobotoL";
+  border-radius: 5px;
+  margin-top: 115px;
+  margin-left: 1470px;
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  width: 158px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
 /* Ссылки внутри выпадающего списка */
 .dropdown-content a {
-	color: black;
-	padding: 8px 10px;
-	text-decoration: none;
-	display: block;
-	border-radius: 5px;
+  color: black;
+  padding: 8px 10px;
+  text-decoration: none;
+  display: block;
+  border-radius: 5px;
 }
 
 /* Изменение цвета выпадающих ссылок при наведении курсора */
 .dropdown-content a:hover {
-	background-color: #ddd;
+  background-color: #ddd;
 }
 
 /* Показать выпадающее меню при наведении курсора */
 .dropdown:hover .dropdown-content {
-	display: block;
+  display: block;
 }
 
 .admin-panel-button {
-	position: fixed;
-	color: #e6dddd;
-	background-color: #6161fa;
-	border: none;
-	margin-top: 109px;
-	margin-left: 1030px;
-	width: auto;
-	height: 19px;
-	font-size: 18px;
-	font-family: 'RobotoM';
-	background-size: cover;
-	background-position: center;
-	transition: transform 0.2s ease, filter 0.2s ease;
+  position: fixed;
+  color: #e6dddd;
+  background-color: #6161fa;
+  border: none;
+  margin-top: 109px;
+  margin-left: 1030px;
+  width: auto;
+  height: 19px;
+  font-size: 18px;
+  font-family: "RobotoM";
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.calendar-container {
+  position: fixed; /* Фиксированное позиционирование */
+  top: 50%; /* Сдвигаем на 50% от верха */
+  left: 50%; /* Сдвигаем на 50% от левого края */
+  transform: translate(-50%, -50%); /* Центрируем */
+  z-index: 1000; /* Убедитесь, что календарь поверх других элементов */
+  background: white; /* Фон календаря */
+  padding: 20px; /* Отступы внутри календаря */
+  border-radius: 10px; /* Скругление углов */
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Тень */
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
+  z-index: 999; /* Под календарем, но поверх других элементов */
 }

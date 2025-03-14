@@ -1,92 +1,92 @@
 .calendar {
-	margin-top: 5px;
-	width: 220px;
-	height: 160px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	overflow: auto;
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-	font-family: Arial, sans-serif;
-	display: flex;
-	flex-direction: column;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 1;
+  margin-top: 5px;
+  width: 1100px;
+  height: 600px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: auto;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
 .header {
-	background-color: #6161fa;
-	color: white;
-	padding: 2px;
-	text-align: center;
-	font-size: 10px;
-	position: sticky;
-	top: 0;
-	z-index: 1;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+  background-color: #6161fa;
+  color: white;
+  padding: 2px;
+  text-align: center;
+  font-size: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .left-date-button {
-	background: url('../images/left_button.png');
-	background-size: cover;
-	background-position: center;
-	height: 29px;
-	border: none;
+  background: url("../images/left_button.png");
+  background-size: cover;
+  background-position: center;
+  height: 29px;
+  border: none;
 
-	width: 20px;
+  width: 20px;
 }
 .right-date-button {
-	margin-top: -2px;
-	background: url('../images/right_button.png');
-	background-size: cover;
-	background-position: center;
-	height: 29px;
-	border: none;
-	width: 20px;
+  margin-top: -2px;
+  background: url("../images/right_button.png");
+  background-size: cover;
+  background-position: center;
+  height: 29px;
+  border: none;
+  width: 20px;
 }
 
 .days-of-week {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr);
-	background-color: #f8f9fa;
-	padding: 1px 0;
-	font-size: 8px;
-	position: sticky;
-	top: 14px; /* Высота заголовка */
-	z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #f8f9fa;
+  padding: 1px 0;
+  font-size: 16px;
+  position: sticky;
+  top: 14px; /* Высота заголовка */
+  z-index: 1;
 }
 
 .day-of-week {
-	text-align: center;
-	font-weight: bold;
-	color: #6c757d;
+  text-align: center;
+  font-weight: bold;
+  color: #6c757d;
 }
 
 .days {
-	display: grid;
-	grid-template-columns: repeat(7, 1fr);
-	gap: 1px;
-	padding: 1px;
-	flex-grow: 1;
-	font-size: 8px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  padding: 1px;
+  flex-grow: 1;
+  font-size: 14px;
 }
 
 .day {
-	text-align: center;
-	padding: 2px;
-	border: 1px solid #dee2e6;
-	background-color: #fff;
-	cursor: pointer;
+  text-align: center;
+  padding: 2px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  cursor: pointer;
 }
 
 .day.prev-month,
 .day.next-month {
-	color: #ccc;
+  color: #ccc;
 }
 
 .day.selected {
-	border-radius: 5px;
-	color: rgb(0, 0, 0);
-	border: 3px solid red;
+  border-radius: 5px;
+  color: rgb(0, 0, 0);
+  border: 3px solid red;
 }
