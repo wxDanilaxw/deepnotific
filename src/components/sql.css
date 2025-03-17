@@ -1,94 +1,39 @@
-INSERT INTO events (title, description, event_date, event_type, event_kind, start_date, end_date, status, departments, notified_users)
-VALUES
-    ('Мартовский семинар', 'Семинар по маркетинговым стратегиям', '2025-03-20', 'Очное', 'Семинар', '2025-03-20', '2025-03-20', TRUE, ARRAY['Marketing', 'Sales'], ARRAY[1, 5]),
-    ('Встреча с партнерами', 'Встреча с ключевыми партнерами', '2025-03-22', 'Очное', 'Встреча', '2025-03-22', '2025-03-22', TRUE, ARRAY['Finance', 'IT'], ARRAY[2, 6]),
-    ('Онлайн-тренинг', 'Тренинг по работе с новым ПО', '2025-03-25', 'Онлайн', 'Тренинг', '2025-03-25', '2025-03-25', TRUE, ARRAY['HR', 'IT'], ARRAY[3, 4]),
-    ('Командное мероприятие', 'Командообразующее мероприятие', '2025-03-28', 'Очное', 'Мероприятие', '2025-03-28', '2025-03-28', TRUE, ARRAY['Sales', 'Marketing', 'Finance'], ARRAY[1, 2, 3, 4, 5, 6])
-ON CONFLICT DO NOTHING;
 
-
+-- Создание таблицы departments
 CREATE TABLE departments (
     id_department SERIAL PRIMARY KEY,
     department_name VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE user_departments (
-    id_user INT REFERENCES users(id_user) ON DELETE CASCADE,
-    id_department INT REFERENCES departments(id_department) ON DELETE CASCADE,
-    PRIMARY KEY (id_user, id_department)
+-- Создание таблицы USERS
+CREATE TABLE USERS (
+    id_user SERIAL PRIMARY KEY,
+    login_users VARCHAR(50) NOT NULL UNIQUE,
+    password_users VARCHAR(100) NOT NULL,
+    role user_role NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100),
+    id_department INT REFERENCES departments(id_department) ON DELETE SET NULL
 );
 
-CREATE TABLE event_departments (
-    id_event INT REFERENCES events(id) ON DELETE CASCADE,
-    id_department INT REFERENCES departments(id_department) ON DELETE CASCADE,
-    PRIMARY KEY (id_event, id_department)
-);
-
+-- Вставка данных в таблицу departments
 INSERT INTO departments (department_name) VALUES
-('Отдел разработки'),
-('Отдел маркетинга'),
-('Отдел продаж'),
-('Отдел поддержки');
+('IT'),
+('HR'),
+('Sales'),
+('Marketing'),
+('Finance');
 
--- Добавление пользователей
-INSERT INTO users (login_users, password_users, role, last_name, first_name, middle_name) VALUES
-('ivanov', 'password123', 'admin', 'Иванов', 'Иван', 'Иванович'),
-('petrov', 'password456', 'user', 'Петров', 'Петр', 'Петрович'),
-('sidorov', 'password789', 'user', 'Сидоров', 'Сидор', 'Сидорович');
+-- Вставка данных в таблицу USERS
+INSERT INTO USERS (login_users, password_users, role, last_name, first_name, middle_name, id_department) VALUES
+('user1', 'password1', 'user', 'Иванов', 'Иван', 'Иванович', 1),
+('user2', 'password2', 'admin', 'Петров', 'Петр', 'Петрович', 2),
+('user3', 'password3', 'guest', 'Сидоров', 'Сидор', 'Сидорович', 3),
+('user4', 'password4', 'user', 'Смирнов', 'Алексей', 'Алексеевич', 4),
+('user5', 'password5', 'admin', 'Кузнецов', 'Дмитрий', 'Дмитриевич', 5);
 
--- Связь пользователей с отделами
-INSERT INTO user_departments (id_user, id_department) VALUES
-(1, 1), -- Иванов в отделе разработки
-(2, 2), -- Петров в отделе маркетинга
-(3, 3); -- Сидоров в отделе продаж
-
-
--- Создание события
-INSERT INTO events (title, description, event_date, event_type, event_kind, start_date, end_date, status)
-VALUES ('Совещание', 'Обсуждение новых проектов', '2023-10-15', 'offline', 'meeting', '2023-10-15 10:00', '2023-10-15 12:00', TRUE)
-RETURNING id;
-
--- Предположим, что id созданного события = 1
--- Связь события с отделами
-INSERT INTO event_departments (id_event, id_department) VALUES
-(1, 1), -- Связь с отделом разработки
-(1, 2); -- Связь с отделом маркетинга
-
-
-ALTER TABLE events
-ALTER COLUMN departments DROP NOT NULL,
-ALTER COLUMN notified_users DROP NOT NULL;
-
-INSERT INTO events (
-    title,
-    description,
-    event_date,
-    event_type,
-    event_kind,
-    start_date,
-    end_date,
-    status,
-    departments,
-    notified_users
-) VALUES (
-    'Совещание',
-    'Обсуждение новых проектов',
-    '2023-10-15',
-    'offline',
-    'meeting',
-    '2023-10-15 10:00',
-    '2023-10-15 12:00',
-    TRUE,
-    ARRAY['Отдел разработки', 'Отдел маркетинга'], -- Пример отделов
-    ARRAY[1, 2] -- Пример ID пользователей для уведомления
-);
-
-
-ALTER TABLE events
-ALTER COLUMN departments DROP NOT NULL,
-ALTER COLUMN notified_users DROP NOT NULL;
-
-
+-- Создание таблицы events
 CREATE TABLE IF NOT EXISTS events (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -104,17 +49,42 @@ CREATE TABLE IF NOT EXISTS events (
     notified_users INTEGER[] DEFAULT '{}' -- Пустой массив по умолчанию
 );
 
-ALTER TABLE users ADD COLUMN id_department INT REFERENCES departments(id_department) ON DELETE SET NULL;
-ALTER TABLE users ADD COLUMN user_role VARCHAR(50) NOT NULL DEFAULT 'user';
-UPDATE users SET user_role = 'user' WHERE user_role IS NULL;
-INSERT INTO users (login_users, password_users, user_role, id_department)
-VALUES ('user1', 'password1', 'user', 1),
-       ('user2', 'password2', 'user', 2);
+-- Вставка данных в таблицу events
+INSERT INTO events (title, description, event_date, event_type, event_kind, start_date, end_date, status, departments, notified_users) VALUES
+('Конференция 2023', 'Международная конференция по технологиям', '2024-11-15', 'Очное', 'Конференция', '2024-11-15', '2024-11-17', TRUE, ARRAY['IT', 'HR'], ARRAY[1, 2, 3]),
+('День рождения', 'Празднование дня рождения', '2023-10-30', 'Заочное', 'Праздник', '2023-10-30', '2023-10-30', TRUE, ARRAY['Sales', 'Marketing'], ARRAY[4, 5]),
+('Хотите', 'Хотите', '2024-10-30', 'Онлайн', 'Вебинар', '2024-10-30', '2024-10-30', TRUE, ARRAY['Finance'], ARRAY[6]),
+('Мартовский семинар', 'Семинар по маркетинговым стратегиям', '2025-03-20', 'Очное', 'Семинар', '2025-03-20', '2025-03-20', TRUE, ARRAY['Marketing', 'Sales'], ARRAY[1, 5]),
+('Встреча с партнерами', 'Встреча с ключевыми партнерами', '2025-03-22', 'Очное', 'Встреча', '2025-03-22', '2025-03-22', TRUE, ARRAY['Finance', 'IT'], ARRAY[2, 6]),
+('Онлайн-тренинг', 'Тренинг по работе с новым ПО', '2025-03-25', 'Онлайн', 'Тренинг', '2025-03-25', '2025-03-25', TRUE, ARRAY['HR', 'IT'], ARRAY[3, 4]),
+('Командное мероприятие', 'Командообразующее мероприятие', '2025-03-28', 'Очное', 'Мероприятие', '2025-03-28', '2025-03-28', TRUE, ARRAY['Sales', 'Marketing', 'Finance'], ARRAY[1, 2, 3, 4, 5, 6]);
 
-CREATE TABLE IF NOT EXISTS users (
-  id_user SERIAL PRIMARY KEY,
-  login_users VARCHAR(100) NOT NULL UNIQUE,
-  password_users VARCHAR(100) NOT NULL,
-  user_role VARCHAR(50) NOT NULL DEFAULT 'user',
-  id_department INT REFERENCES departments(id_department) ON DELETE SET NULL
+-- Создание таблицы user_departments
+CREATE TABLE user_departments (
+    id_user INT REFERENCES users(id_user) ON DELETE CASCADE,
+    id_department INT REFERENCES departments(id_department) ON DELETE CASCADE,
+    PRIMARY KEY (id_user, id_department)
 );
+
+-- Вставка данных в таблицу user_departments
+INSERT INTO user_departments (id_user, id_department) VALUES
+(1, 1), -- Иванов в отделе разработки
+(2, 2), -- Петров в отделе маркетинга
+(3, 3), -- Сидоров в отделе продаж
+(4, 4), -- Смирнов в отделе маркетинга
+(5, 5); -- Кузнецов в отделе финансов
+
+-- Создание таблицы event_departments
+CREATE TABLE event_departments (
+    id_event INT REFERENCES events(id) ON DELETE CASCADE,
+    id_department INT REFERENCES departments(id_department) ON DELETE CASCADE,
+    PRIMARY KEY (id_event, id_department)
+);
+
+-- Вставка данных в таблицу event_departments
+INSERT INTO event_departments (id_event, id_department) VALUES
+(1, 1), -- Конференция 2023 связана с отделом IT
+(1, 2), -- Конференция 2023 связана с отделом HR
+(2, 3), -- День рождения связан с отделом Sales
+(2, 4), -- День рождения связан с отделом Marketing
+(3, 5); -- Хотите связано с отделом Finance
