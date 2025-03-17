@@ -88,3 +88,6 @@ INSERT INTO event_departments (id_event, id_department) VALUES
 (2, 3), -- День рождения связан с отделом Sales
 (2, 4), -- День рождения связан с отделом Marketing
 (3, 5); -- Хотите связано с отделом Finance
+
+
+Создай сортировку для списка мероприятий 
