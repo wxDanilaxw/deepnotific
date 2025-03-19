@@ -5,7 +5,7 @@ import Select from 'react-select'
 
 Modal.setAppElement('#root')
 
-const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
+const EditEventModal = ({ isOpen, onRequestClose, event, onEventUpdated }) => {
 	const [title, setTitle] = useState('')
 	const [description, setDescription] = useState('')
 	const [eventType, setEventType] = useState('')
@@ -23,6 +23,37 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 	const [loadingUsers, setLoadingUsers] = useState(false)
 	const [error, setError] = useState(null)
 
+	// Инициализация состояний при изменении event
+	useEffect(() => {
+		if (event) {
+			setTitle(event.title || '')
+			setDescription(event.description || '')
+			setEventType(event.event_type || '')
+			setEventKind(event.event_kind || '')
+			setStartDate(event.start_date || '')
+			setEndDate(event.end_date || '')
+			setStatus(event.status || true)
+
+			// Преобразуем departments в массив чисел (ID отделов)
+			const departmentsArray = event.departments
+				? event.departments
+						.map(dept => {
+							const department = allDepartments.find(
+								d => d.department_name === dept
+							)
+							return department ? department.id_department : null
+						})
+						.filter(id => id !== null)
+				: []
+			setSelectedDepartments(departmentsArray)
+
+			// Убедимся, что notified_users является массивом чисел
+			const notifiedUsersArray = event.notified_users || []
+			setNotifiedUsers(notifiedUsersArray)
+		}
+	}, [event, allDepartments])
+
+	// Загрузка отделов
 	useEffect(() => {
 		if (isOpen) {
 			setLoadingDepartments(true)
@@ -42,6 +73,7 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 		}
 	}, [isOpen])
 
+	// Загрузка пользователей
 	useEffect(() => {
 		if (selectedDepartments.length > 0) {
 			setLoadingUsers(true)
@@ -67,8 +99,8 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 		}
 	}, [selectedDepartments])
 
+	// Обработка отправки формы
 	const handleSubmit = () => {
-		// Проверка обязательных полей
 		if (!title) {
 			setError('Заполните поле "Заголовок"')
 			return
@@ -98,38 +130,30 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 			return
 		}
 
-		const eventData = {
+		const updatedEventData = {
 			title,
 			description,
-			event_type: eventType, // Переименуем поле
-			event_kind: eventKind, // Переименуем поле
-			start_date: startDate, // Переименуем поле
-			end_date: endDate, // Переименуем поле
+			event_type: eventType,
+			event_kind: eventKind,
+			start_date: startDate,
+			end_date: endDate,
 			status,
-			departments: selectedDepartments, // Оставляем как массив чисел
-			notified_users: notifiedUsers, // Добавляем массив уведомленных пользователей
-			user_role: 'admin', // Оставляем, но сервер его не использует
+			departments: selectedDepartments,
+			notified_users: notifiedUsers,
+			user_role: 'admin',
 		}
 
-		console.log('Sending event data:', eventData) // Логирование данных перед отправкой
-
 		axios
-			.post('http://localhost:3000/events', eventData)
+			.put(`http://localhost:3000/events/${event.id}`, updatedEventData)
 			.then(response => {
-				console.log('Event created successfully:', response.data)
-				onEventCreated() // Обновляем список событий в AdminPage
+				console.log('Event updated successfully:', response.data)
+				onEventUpdated() // Обновляем список событий в AdminPage
 				onRequestClose() // Закрываем модальное окно
 			})
 			.catch(error => {
-				console.error('Error creating event:', error)
+				console.error('Error updating event:', error)
 				if (error.response) {
 					console.error('Server responded with:', error.response.data)
-					setError(
-						'Ошибка при создании события: ' +
-							(error.response.data.error || 'Неизвестная ошибка')
-					)
-				} else {
-					setError('Ошибка при создании события')
 				}
 			})
 	}
@@ -138,14 +162,14 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 		<Modal
 			isOpen={isOpen}
 			onRequestClose={onRequestClose}
-			contentLabel='Создать событие'
+			contentLabel='Редактировать событие'
 			className='modal'
 			overlayClassName='overlay'
 		>
 			<button className='close-button' onClick={onRequestClose}>
 				×
 			</button>
-			<h3>Создание нового события</h3>
+			<h3>Редактирование события</h3>
 			{error && <div className='error-message'>{error}</div>}
 			<div className='two-parts-events-edit'>
 				<div className='one-of-part-events-edit'>
@@ -168,10 +192,8 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 							onChange={e => setEventType(e.target.value)}
 							required
 						>
-							<option value=''>Выберите тип</option>
 							<option value='online'>Онлайн</option>
 							<option value='offline'>Офлайн</option>
-							<option value='offline'>Заочное</option>
 						</select>
 					</div>
 
@@ -183,7 +205,6 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 							onChange={e => setEventKind(e.target.value)}
 							required
 						>
-							<option value=''>Выберите вид</option>
 							<option value='conference'>Конференция</option>
 							<option value='call'>Созвон</option>
 							<option value='meeting'>Сбор</option>
@@ -281,12 +302,12 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 					</div>
 
 					<button className='button-event-edit' onClick={handleSubmit}>
-						Создать
+						Сохранить изменения
 					</button>
 				</div>
 
 				<textarea
-					placeholder='Описание меропрteиятия'
+					placeholder='Описание мероприятия'
 					className='input-description-create'
 					value={description}
 					onChange={e => setDescription(e.target.value)}
@@ -296,4 +317,4 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 	)
 }
 
-export default CreateEventModal
+export default EditEventModal

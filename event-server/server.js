@@ -295,72 +295,73 @@ app.post('/events', async (req, res) => {
 	console.log('Request Body:', req.body)
 
 	const {
-		title, // Заголовок
-		description, // Описание
-		event_type, // Тип мероприятия
-		event_kind, // Вид мероприятия
-		start_date, // Дата начала
-		end_date, // Дата окончания
-		status, // Статус
-		departments, // Отделы
-		user_role, // Роль пользователя
+		title,
+		description,
+		event_type,
+		event_kind,
+		start_date,
+		end_date,
+		status,
+		departments,
+		notified_users,
 	} = req.body
 
 	// Проверка роли пользователя
-	if (user_role !== 'admin') {
+	if (req.body.user_role !== 'admin') {
 		console.log('Access denied: User is not an admin')
 		return res
 			.status(403)
 			.json({ error: 'Access denied: User is not an admin' })
 	}
 
-	// Проверка каждого обязательного поля
-	if (!title) {
-		return res.status(400).json({ error: 'Заполните поле "Заголовок"' })
-	}
-	if (!event_type) {
-		return res.status(400).json({ error: 'Выберите "Тип мероприятия"' })
-	}
-	if (!event_kind) {
-		return res.status(400).json({ error: 'Выберите "Вид мероприятия"' })
-	}
-	if (!start_date) {
-		return res.status(400).json({ error: 'Укажите "Дату начала"' })
-	}
-	if (!end_date) {
-		return res.status(400).json({ error: 'Укажите "Дату окончания"' })
-	}
-	if (isNaN(new Date(start_date).getTime())) {
-		return res.status(400).json({ error: 'Некорректная дата начала' })
-	}
-	if (isNaN(new Date(end_date).getTime())) {
-		return res.status(400).json({ error: 'Некорректная дата окончания' })
-	}
-	if (new Date(start_date) > new Date(end_date)) {
+	// Проверка на пустые значения обязательных полей
+	if (
+		!title ||
+		!event_type ||
+		!event_kind ||
+		!start_date ||
+		!end_date ||
+		!departments
+	) {
+		console.log('Validation error: Missing required fields')
 		return res
 			.status(400)
-			.json({ error: 'Дата начала не может быть позже даты окончания' })
+			.json({ error: 'Validation error: Missing required fields' })
 	}
-	if (!departments || !Array.isArray(departments) || departments.length === 0) {
-		return res.status(400).json({ error: 'Выберите хотя бы один отдел' })
+
+	// Проверка корректности дат
+	if (new Date(start_date) > new Date(end_date)) {
+		console.log('Validation error: Start date cannot be after end date')
+		return res
+			.status(400)
+			.json({ error: 'Validation error: Start date cannot be after end date' })
+	}
+
+	// Проверка корректности массива departments
+	if (!Array.isArray(departments)) {
+		console.log('Validation error: Departments must be an array')
+		return res
+			.status(400)
+			.json({ error: 'Validation error: Departments must be an array' })
 	}
 
 	try {
 		// Начало транзакции
 		await pool.query('BEGIN')
 
-		// Вставка данных в таблицу events (только необходимые поля)
+		// Вставка данных в таблицу events
 		const eventResult = await pool.query(
 			`INSERT INTO events (
-        title, 
-        description, 
-        event_type, 
-        event_kind, 
-        start_date, 
-        end_date, 
-        status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
-      RETURNING id`,
+                title, 
+                description, 
+                event_type, 
+                event_kind, 
+                start_date, 
+                end_date, 
+                status,
+                notified_users
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+            RETURNING id`,
 			[
 				title,
 				description,
@@ -369,6 +370,7 @@ app.post('/events', async (req, res) => {
 				start_date,
 				end_date,
 				status || true,
+				notified_users || [], // Добавляем массив уведомленных пользователей
 			]
 		)
 
