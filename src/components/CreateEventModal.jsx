@@ -23,6 +23,9 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 	const [loadingUsers, setLoadingUsers] = useState(false)
 	const [error, setError] = useState(null)
 
+	// Состояние для управления текущим шагом
+	const [currentStep, setCurrentStep] = useState(1)
+
 	useEffect(() => {
 		if (isOpen) {
 			setLoadingDepartments(true)
@@ -67,63 +70,99 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 		}
 	}, [selectedDepartments])
 
-	const handleSubmit = () => {
-		// Проверка обязательных полей
-		if (!title) {
-			setError('Заполните поле "Заголовок"')
-			return
+	// Обработчик нажатия Enter
+	const handleKeyPress = e => {
+		if (e.key === 'Enter') {
+			handleNext()
 		}
-		if (!eventType) {
-			setError('Выберите "Тип мероприятия"')
-			return
-		}
-		if (!eventKind) {
-			setError('Выберите "Вид мероприятия"')
-			return
-		}
-		if (!startDate) {
-			setError('Укажите "Дату начала"')
-			return
-		}
-		if (!endDate) {
-			setError('Укажите "Дату окончания"')
-			return
-		}
-		if (new Date(startDate) > new Date(endDate)) {
-			setError('Дата начала не может быть позже даты окончания')
-			return
-		}
-		if (selectedDepartments.length === 0) {
-			setError('Выберите хотя бы один отдел')
-			return
-		}
+	}
 
+	// Переход к следующему шагу
+	const handleNext = () => {
+		if (validateStep(currentStep)) {
+			setCurrentStep(currentStep + 1)
+		}
+	}
+
+	// Переход к предыдущему шагу
+	const handleBack = () => {
+		setCurrentStep(currentStep - 1)
+	}
+
+	// Валидация текущего шага
+	const validateStep = step => {
+		switch (step) {
+			case 1:
+				if (!title) {
+					setError('Заполните поле "Заголовок"')
+					return false
+				}
+				break
+			case 2:
+				if (!eventType) {
+					setError('Выберите "Тип мероприятия"')
+					return false
+				}
+				break
+			case 3:
+				if (!eventKind) {
+					setError('Выберите "Вид мероприятия"')
+					return false
+				}
+				break
+			case 4:
+				if (!startDate) {
+					setError('Укажите "Дату начала"')
+					return false
+				}
+				break
+			case 5:
+				if (!endDate) {
+					setError('Укажите "Дату окончания"')
+					return false
+				}
+				if (new Date(startDate) > new Date(endDate)) {
+					setError('Дата начала не может быть позже даты окончания')
+					return false
+				}
+				break
+			case 6:
+				if (selectedDepartments.length === 0) {
+					setError('Выберите хотя бы один отдел')
+					return false
+				}
+				break
+			default:
+				break
+		}
+		setError(null)
+		return true
+	}
+
+	const handleSubmit = () => {
 		const eventData = {
 			title,
 			description,
-			event_type: eventType, // Переименуем поле
-			event_kind: eventKind, // Переименуем поле
-			start_date: startDate, // Переименуем поле
-			end_date: endDate, // Переименуем поле
+			event_type: eventType,
+			event_kind: eventKind,
+			start_date: startDate,
+			end_date: endDate,
 			status,
-			departments: selectedDepartments, // Оставляем как массив чисел
-			notified_users: notifiedUsers, // Добавляем массив уведомленных пользователей
-			user_role: 'admin', // Оставляем, но сервер его не использует
+			departments: selectedDepartments,
+			notified_users: notifiedUsers,
+			user_role: 'admin',
 		}
-
-		console.log('Sending event data:', eventData) // Логирование данных перед отправкой
 
 		axios
 			.post('http://localhost:3000/events', eventData)
 			.then(response => {
 				console.log('Event created successfully:', response.data)
-				onEventCreated() // Обновляем список событий в AdminPage
-				onRequestClose() // Закрываем модальное окно
+				onEventCreated()
+				onRequestClose()
 			})
 			.catch(error => {
 				console.error('Error creating event:', error)
 				if (error.response) {
-					console.error('Server responded with:', error.response.data)
 					setError(
 						'Ошибка при создании события: ' +
 							(error.response.data.error || 'Неизвестная ошибка')
@@ -147,150 +186,176 @@ const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
 			</button>
 			<h3>Создание нового события</h3>
 			{error && <div className='error-message'>{error}</div>}
-			<div className='two-parts-events-edit'>
-				<div className='one-of-part-events-edit'>
-					<div className='flex-items'>
-						<label className='label-title'>Заголовок:</label>
-						<input
-							className='input-title'
-							type='text'
-							value={title}
-							onChange={e => setTitle(e.target.value)}
-							required
+
+			{currentStep === 1 && (
+				<div className='step'>
+					<label className='label-title'>Заголовок:</label>
+					<input
+						className='input-title'
+						type='text'
+						value={title}
+						onChange={e => setTitle(e.target.value)}
+						onKeyPress={handleKeyPress}
+						required
+					/>
+				</div>
+			)}
+
+			{currentStep === 2 && (
+				<div className='step'>
+					<label className='label-event-type'>Тип мероприятия:</label>
+					<select
+						className='input-event-type'
+						value={eventType}
+						onChange={e => setEventType(e.target.value)}
+						onKeyPress={handleKeyPress}
+						required
+					>
+						<option value=''>Выберите тип</option>
+						<option value='online'>Онлайн</option>
+						<option value='offline'>Офлайн</option>
+						<option value='offline'>Заочное</option>
+					</select>
+				</div>
+			)}
+
+			{currentStep === 3 && (
+				<div className='step'>
+					<label className='label-event-kind'>Вид мероприятия:</label>
+					<select
+						className='input-event-kind'
+						value={eventKind}
+						onChange={e => setEventKind(e.target.value)}
+						onKeyPress={handleKeyPress}
+						required
+					>
+						<option value=''>Выберите вид</option>
+						<option value='conference'>Конференция</option>
+						<option value='call'>Созвон</option>
+						<option value='meeting'>Сбор</option>
+						<option value='hall_event'>Мероприятие в актовом зале</option>
+					</select>
+				</div>
+			)}
+
+			{currentStep === 4 && (
+				<div className='step'>
+					<label className='label-start-date'>Дата начала:</label>
+					<input
+						className='input-start-date'
+						type='date'
+						value={startDate}
+						onChange={e => setStartDate(e.target.value)}
+						onKeyPress={handleKeyPress}
+						required
+					/>
+				</div>
+			)}
+
+			{currentStep === 5 && (
+				<div className='step'>
+					<label className='label-end-date'>Дата окончания:</label>
+					<input
+						className='input-end-date'
+						type='date'
+						value={endDate}
+						onChange={e => setEndDate(e.target.value)}
+						onKeyPress={handleKeyPress}
+						required
+					/>
+				</div>
+			)}
+
+			{currentStep === 6 && (
+				<div className='step'>
+					<label className='label-departments'>Отделы:</label>
+					{loadingDepartments ? (
+						<p>Загрузка отделов...</p>
+					) : allDepartments.length > 0 ? (
+						<Select
+							isMulti
+							options={allDepartments.map(department => ({
+								value: department.id_department,
+								label: department.department_name,
+							}))}
+							value={selectedDepartments.map(id => ({
+								value: id,
+								label: allDepartments.find(dep => dep.id_department === id)
+									.department_name,
+							}))}
+							onChange={selectedOptions => {
+								setSelectedDepartments(
+									selectedOptions.map(option => option.value)
+								)
+							}}
+							placeholder='Выберите отделы'
 						/>
-					</div>
+					) : (
+						<p>Отделы не загружены</p>
+					)}
+				</div>
+			)}
 
-					<div className='flex-items'>
-						<label className='label-event-type'>Тип мероприятия:</label>
-						<select
-							className='input-event-type'
-							value={eventType}
-							onChange={e => setEventType(e.target.value)}
-							required
-						>
-							<option value=''>Выберите тип</option>
-							<option value='online'>Онлайн</option>
-							<option value='offline'>Офлайн</option>
-							<option value='offline'>Заочное</option>
-						</select>
-					</div>
+			{currentStep === 7 && (
+				<div className='step'>
+					<label className='label-notified-users'>Пользователи:</label>
+					{loadingUsers ? (
+						<p>Загрузка пользователей...</p>
+					) : usersInSelectedDepartments.length > 0 ? (
+						usersInSelectedDepartments.map(user => (
+							<div key={user.id_user}>
+								<input
+									type='checkbox'
+									id={`user-${user.id_user}`}
+									checked={notifiedUsers.includes(user.id_user)}
+									onChange={() => {
+										setNotifiedUsers(prev =>
+											prev.includes(user.id_user)
+												? prev.filter(id => id !== user.id_user)
+												: [...prev, user.id_user]
+										)
+									}}
+								/>
+								<label htmlFor={`user-${user.id_user}`}>
+									{user.login_users} ({user.last_name} {user.first_name})
+								</label>
+							</div>
+						))
+					) : (
+						<p>Пользователи не загружены</p>
+					)}
+				</div>
+			)}
 
-					<div className='flex-items'>
-						<label className='label-event-kind'>Вид мероприятия:</label>
-						<select
-							className='input-event-kind'
-							value={eventKind}
-							onChange={e => setEventKind(e.target.value)}
-							required
-						>
-							<option value=''>Выберите вид</option>
-							<option value='conference'>Конференция</option>
-							<option value='call'>Созвон</option>
-							<option value='meeting'>Сбор</option>
-							<option value='hall_event'>Мероприятие в актовом зале</option>
-						</select>
-					</div>
+			{currentStep === 8 && (
+				<div className='step'>
+					<label className='label-description'>Описание мероприятия:</label>
+					<textarea
+						placeholder='Описание мероприятия'
+						className='input-description-create'
+						value={description}
+						onChange={e => setDescription(e.target.value)}
+						onKeyPress={handleKeyPress}
+					/>
+				</div>
+			)}
 
-					<div className='flex-items'>
-						<label className='label-start-date'>Дата начала:</label>
-						<input
-							className='input-start-date'
-							type='date'
-							value={startDate}
-							onChange={e => setStartDate(e.target.value)}
-							required
-						/>
-					</div>
-
-					<div className='flex-items'>
-						<label className='label-end-date'>Дата окончания:</label>
-						<input
-							className='input-end-date'
-							type='date'
-							value={endDate}
-							onChange={e => setEndDate(e.target.value)}
-							required
-						/>
-					</div>
-
-					<div className='flex-items'>
-						<label className='label-status'>Статус:</label>
-						<input
-							className='input-status'
-							type='checkbox'
-							checked={status}
-							onChange={e => setStatus(e.target.checked)}
-						/>
-					</div>
-
-					<div className='flex-items'>
-						<label className='label-departments'>Отделы:</label>
-						{loadingDepartments ? (
-							<p>Загрузка отделов...</p>
-						) : allDepartments.length > 0 ? (
-							<Select
-								isMulti
-								options={allDepartments.map(department => ({
-									value: department.id_department,
-									label: department.department_name,
-								}))}
-								value={selectedDepartments.map(id => ({
-									value: id,
-									label: allDepartments.find(dep => dep.id_department === id)
-										.department_name,
-								}))}
-								onChange={selectedOptions => {
-									setSelectedDepartments(
-										selectedOptions.map(option => option.value)
-									)
-								}}
-								placeholder='Выберите отделы'
-							/>
-						) : (
-							<p>Отделы не загружены</p>
-						)}
-					</div>
-
-					<div className='flex-items'>
-						<label className='label-notified-users'>Пользователи:</label>
-						{loadingUsers ? (
-							<p>Загрузка пользователей...</p>
-						) : usersInSelectedDepartments.length > 0 ? (
-							usersInSelectedDepartments.map(user => (
-								<div key={user.id_user}>
-									<input
-										type='checkbox'
-										id={`user-${user.id_user}`}
-										checked={notifiedUsers.includes(user.id_user)}
-										onChange={() => {
-											setNotifiedUsers(prev =>
-												prev.includes(user.id_user)
-													? prev.filter(id => id !== user.id_user)
-													: [...prev, user.id_user]
-											)
-										}}
-									/>
-									<label htmlFor={`user-${user.id_user}`}>
-										{user.login_users} ({user.last_name} {user.first_name})
-									</label>
-								</div>
-							))
-						) : (
-							<p>Пользователи не загружены</p>
-						)}
-					</div>
-
-					<button className='button-event-edit' onClick={handleSubmit}>
+			<div className='navigation-buttons'>
+				{currentStep > 1 && (
+					<button className='button-back' onClick={handleBack}>
+						Назад
+					</button>
+				)}
+				{currentStep < 8 && (
+					<button className='button-next' onClick={handleNext}>
+						Далее
+					</button>
+				)}
+				{currentStep === 8 && (
+					<button className='button-submit' onClick={handleSubmit}>
 						Создать
 					</button>
-				</div>
-
-				<textarea
-					placeholder='Описание меропрteиятия'
-					className='input-description-create'
-					value={description}
-					onChange={e => setDescription(e.target.value)}
-				/>
+				)}
 			</div>
 		</Modal>
 	)

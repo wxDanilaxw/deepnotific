@@ -76,23 +76,23 @@ const AdminPage = () => {
 							<div className='elem-description'>
 								<li>
 									<strong>{event.title}</strong> <br />
-									<strong>Тип:</strong> {event.event_type}
-									<br />
-									<strong>Вид:</strong> {event.event_kind}
-									<br />
+									<strong>Тип:</strong> {event.event_type} <br />
+									<strong>Вид:</strong> {event.event_kind} <br />
 									<strong>Дата начала:</strong>{' '}
-									{format(new Date(event.start_date), 'dd-MM-yyyy')}
-									<br />
+									{format(new Date(event.start_date), 'dd-MM-yyyy')} <br />
 									<strong>Дата окончания:</strong>{' '}
-									{format(new Date(event.end_date), 'dd-MM-yyyy')}
-									<br />
+									{format(new Date(event.end_date), 'dd-MM-yyyy')} <br />
 									<strong>Статус:</strong>{' '}
-									{event.status ? 'Активен' : 'Неактивен'}
-									<br />
-									<strong>Отделы:</strong> {event.departments.join(', ')}
+									{event.status ? 'Активен' : 'Неактивен'} <br />
+									<strong>Отделы:</strong>{' '}
+									{event.departments && event.departments.length > 0
+										? event.departments.join(', ')
+										: 'Нет данных'}{' '}
 									<br />
 									<strong>Пользователи для уведомления:</strong>{' '}
-									{event.notified_users.join(', ')}
+									{event.notified_users && event.notified_users.length > 0
+										? event.notified_users.join(', ')
+										: 'Нет данных'}{' '}
 									<br />
 									<div className='button-group'>
 										<button

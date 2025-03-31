@@ -38,7 +38,7 @@ app.get('/users', async (req, res) => {
 
 		if (department_id) {
 			query += ' WHERE id_department = ANY($1::int[])'
-			params.push(department_id.split(',').map(Number)) // Преобразуем строку в массив чисел
+			params.push(department_id.split(',').map(Number))
 		}
 
 		const { rows } = await pool.query(query, params)
@@ -88,7 +88,7 @@ const createTables = async () => {
         start_date DATE NOT NULL,
         end_date DATE NOT NULL,
         status BOOLEAN NOT NULL DEFAULT TRUE,
-        notified_users INTEGER[] NOT NULL
+        notified_users INTEGER[] DEFAULT '{}'
       );
 
       CREATE TABLE IF NOT EXISTS event_departments (
@@ -124,13 +124,32 @@ app.get('/events', async (req, res) => {
 	console.log('GET /events request received')
 	const eventDate = req.query.event_date // Получаем дату из запроса
 	try {
-		let query = 'SELECT * FROM events'
+		let query = `
+      SELECT 
+        e.id,
+        e.title,
+        e.description,
+        e.event_type,
+        e.event_kind,
+        e.start_date,
+        e.end_date,
+        e.status,
+        COALESCE(ARRAY_AGG(u.login_users) FILTER (WHERE u.login_users IS NOT NULL), '{}') AS notified_users,
+        COALESCE(ARRAY_AGG(d.department_name) FILTER (WHERE d.department_name IS NOT NULL), '{}') AS departments
+      FROM events e
+      LEFT JOIN event_departments ed ON e.id = ed.id_event
+      LEFT JOIN departments d ON ed.id_department = d.id_department
+      LEFT JOIN users u ON u.id_user = ANY(e.notified_users)
+    `
+
 		let params = []
 
 		if (eventDate) {
-			query += ' WHERE event_date = $1'
+			query += ' WHERE e.event_date = $1'
 			params.push(eventDate)
 		}
+
+		query += ' GROUP BY e.id' // Группируем по ID события
 
 		const { rows } = await pool.query(query, params)
 		console.log('Events retrieved:', rows)
@@ -190,15 +209,16 @@ app.post('/events', async (req, res) => {
 	console.log('Request Body:', req.body)
 
 	const {
-		title, // Заголовок
-		description, // Описание
-		event_type, // Тип мероприятия
-		event_kind, // Вид мероприятия
-		start_date, // Дата начала
-		end_date, // Дата окончания
-		status, // Статус
-		departments, // Отделы
-		user_role, // Роль пользователя
+		title,
+		description,
+		event_type,
+		event_kind,
+		start_date,
+		end_date,
+		status,
+		departments,
+		notified_users,
+		user_role,
 	} = req.body
 
 	// Проверка роли пользователя
@@ -244,7 +264,7 @@ app.post('/events', async (req, res) => {
 		// Начало транзакции
 		await pool.query('BEGIN')
 
-		// Вставка данных в таблицу events (только необходимые поля)
+		// Вставка данных в таблицу events
 		const eventResult = await pool.query(
 			`INSERT INTO events (
         title, 
@@ -253,8 +273,9 @@ app.post('/events', async (req, res) => {
         event_kind, 
         start_date, 
         end_date, 
-        status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7) 
+        status,
+        notified_users
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING id`,
 			[
 				title,
@@ -264,113 +285,7 @@ app.post('/events', async (req, res) => {
 				start_date,
 				end_date,
 				status || true,
-			]
-		)
-
-		const eventId = eventResult.rows[0].id
-
-		// Вставка данных в таблицу event_departments
-		for (const departmentId of departments) {
-			await pool.query(
-				'INSERT INTO event_departments (id_event, id_department) VALUES ($1, $2)',
-				[eventId, departmentId]
-			)
-		}
-
-		// Завершение транзакции
-		await pool.query('COMMIT')
-
-		console.log('Event created with ID:', eventId)
-		res.status(201).json({ message: 'Event created successfully', eventId })
-	} catch (err) {
-		// Откат транзакции в случае ошибки
-		await pool.query('ROLLBACK')
-		console.error('Error creating event:', err)
-		res.status(500).json({ error: 'Internal Server Error' })
-	}
-})
-
-app.post('/events', async (req, res) => {
-	console.log('POST /events request received')
-	console.log('Request Body:', req.body)
-
-	const {
-		title,
-		description,
-		event_type,
-		event_kind,
-		start_date,
-		end_date,
-		status,
-		departments,
-		notified_users,
-	} = req.body
-
-	// Проверка роли пользователя
-	if (req.body.user_role !== 'admin') {
-		console.log('Access denied: User is not an admin')
-		return res
-			.status(403)
-			.json({ error: 'Access denied: User is not an admin' })
-	}
-
-	// Проверка на пустые значения обязательных полей
-	if (
-		!title ||
-		!event_type ||
-		!event_kind ||
-		!start_date ||
-		!end_date ||
-		!departments
-	) {
-		console.log('Validation error: Missing required fields')
-		return res
-			.status(400)
-			.json({ error: 'Validation error: Missing required fields' })
-	}
-
-	// Проверка корректности дат
-	if (new Date(start_date) > new Date(end_date)) {
-		console.log('Validation error: Start date cannot be after end date')
-		return res
-			.status(400)
-			.json({ error: 'Validation error: Start date cannot be after end date' })
-	}
-
-	// Проверка корректности массива departments
-	if (!Array.isArray(departments)) {
-		console.log('Validation error: Departments must be an array')
-		return res
-			.status(400)
-			.json({ error: 'Validation error: Departments must be an array' })
-	}
-
-	try {
-		// Начало транзакции
-		await pool.query('BEGIN')
-
-		// Вставка данных в таблицу events
-		const eventResult = await pool.query(
-			`INSERT INTO events (
-                title, 
-                description, 
-                event_type, 
-                event_kind, 
-                start_date, 
-                end_date, 
-                status,
-                notified_users
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
-            RETURNING id`,
-			[
-				title,
-				description,
-				event_type,
-				event_kind,
-				start_date,
-				end_date,
-				status || true,
-				notified_users || [], // Добавляем массив уведомленных пользователей
+				notified_users || [],
 			]
 		)
 
