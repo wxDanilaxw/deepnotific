@@ -1,27 +1,26 @@
 {
-	"name": "event-server",
-	"version": "1.0.0",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"description": "",
-	"dependencies": {
-		"react": "^18.0.0",
-		"react-dom": "^18.0.0",
-		"react-router-dom": "^6.0.0",
-		"axios": "^0.21.1",
-		"webpack": "^5.0.0",
-		"webpack-dev-server": "^4.0.0",
-		"babel-loader": "^8.0.0",
-		"css-loader": "^6.0.0",
-		"style-loader": "^3.0.0",
-		"eslint": "^8.0.0",
-		"eslint-config-react-app": "^7.0.0",
-		"eslint-plugin-react": "^7.0.0",
-		"eslint-plugin-react-hooks": "^4.0.0"
-	}
+  "name": "event-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Event Management Server",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0"
+  }
 }
