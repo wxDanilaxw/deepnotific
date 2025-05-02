@@ -1,92 +1,196 @@
-.calendar {
-  margin-top: 5px;
-  width: 1100px;
-  height: 600px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  overflow: auto;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif;
+/* Обновлённый компонент календаря */
+.calendar-container {
   display: flex;
-  flex-direction: column;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-  z-index: 1;
+  width: 1400px;
+  height: 670px;
+  font-family: Arial, sans-serif;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
 }
 
-.header {
-  background-color: #6161fa;
-  color: white;
-  padding: 2px;
-  text-align: center;
-  font-size: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 1;
+/* Основная панель календаря */
+.calendar {
+  width: 800px;
+  background: #fff;
+  border-right: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Заголовок календаря */
+.calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 15px 25px;
+  background-color: #6161fa;
+  color: white;
 }
 
-.left-date-button {
-  background: url("../images/left_button.png");
-  background-size: cover;
-  background-position: center;
-  height: 29px;
+.calendar-header button {
+  background: none;
   border: none;
-
-  width: 20px;
-}
-.right-date-button {
-  margin-top: -2px;
-  background: url("../images/right_button.png");
-  background-size: cover;
-  background-position: center;
-  height: 29px;
-  border: none;
-  width: 20px;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px 20px;
+  border-radius: 6px;
+  transition: background 0.2s;
 }
 
-.days-of-week {
+.calendar-header button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Дни недели */
+.calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background-color: #f8f9fa;
-  padding: 1px 0;
-  font-size: 16px;
-  position: sticky;
-  top: 14px; /* Высота заголовка */
-  z-index: 1;
-}
-
-.day-of-week {
-  text-align: center;
-  font-weight: bold;
+  background: #f8f9fa;
+  padding: 12px 0;
+  font-weight: 600;
   color: #6c757d;
+  border-bottom: 1px solid #eee;
 }
 
-.days {
+/* Сетка дней */
+.calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 1px;
-  padding: 1px;
+  background: #eee;
   flex-grow: 1;
+  padding: 1px;
+}
+
+/* Стили дня */
+.calendar-day {
+  position: relative;
+  padding: 15px;
+  background: white;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.calendar-day:hover {
+  background: #f8f9fa;
+  z-index: 2;
+  transform: scale(1.02);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day.selected {
+  border: 3px solid #ff4444;
+  z-index: 3;
+}
+
+.calendar-day.prev-month,
+.calendar-day.next-month {
+  color: #ccc;
+  background: #fcfcfc;
+}
+
+/* Точка события */
+.event-dot {
+  width: 8px;
+  height: 8px;
+  background: #6161fa;
+  border-radius: 50%;
+  margin-top: 5px;
+  position: absolute;
+  bottom: 5px;
+}
+
+/* Панель событий */
+.events-panel {
+  width: 600px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.title-event-panel {
+  margin-left: 20px;
+}
+
+/* Вкладки */
+.tabs {
+  display: flex;
+  background: #6161fa;
+}
+
+.tab {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tab.active {
+  background: rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+}
+
+/* Содержимое вкладок */
+.tab-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Элементы событий */
+.event-item {
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #6161fa;
+  transition: transform 0.2s;
+}
+
+.event-item:hover {
+  transform: translateX(5px);
+}
+
+.event-item h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.event-item p {
+  margin: 0 0 5px 0;
+  color: #666;
   font-size: 14px;
 }
 
-.day {
-  text-align: center;
-  padding: 2px;
-  border: 1px solid #dee2e6;
-  background-color: #fff;
-  cursor: pointer;
+.event-time {
+  color: #6161fa;
+  font-weight: 500;
+  font-size: 13px;
 }
 
-.day.prev-month,
-.day.next-month {
-  color: #ccc;
-}
+/* Адаптивные элементы */
+@media (max-width: 1200px) {
+  .calendar-container {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+  }
 
-.day.selected {
-  border-radius: 5px;
-  color: rgb(0, 0, 0);
-  border: 3px solid red;
+  .calendar,
+  .events-panel {
+    width: 100%;
+    height: auto;
+  }
 }

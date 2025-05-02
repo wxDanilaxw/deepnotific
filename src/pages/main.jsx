@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Calendar from "./Calendar";
 import WorkList from "../components/work_list";
@@ -8,136 +8,144 @@ import EventDetailModal from "../components/EventDetailModal";
 import CreateEventModal from "../components/CreateEventModal";
 
 const Main = () => {
-  // Модальное окно
+  // Состояния для модальных окон и аутентификации
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [userRole, setUserRole] = useState("");
-  const [userDepartment, setUserDepartment] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    localStorage.getItem("isAuthenticated") === "true"
+  );
+  const [fullName, setFullName] = useState(
+    localStorage.getItem("fullName") || ""
+  );
+  const [userRole, setUserRole] = useState(
+    localStorage.getItem("userRole") || ""
+  );
+  const [userDepartment, setUserDepartment] = useState(
+    localStorage.getItem("userDepartment") || ""
+  );
+
+  // Состояния для событий
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+
+  // Состояния для модальных окон
   const [isEventDetailModalOpen, setIsEventDetailModalOpen] = useState(false);
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
-  const navigate = useNavigate();
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
 
-  // Состояние для управления видимостью выпадающего меню
+  // Состояния для календаря
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  // Состояние для выпадающего меню
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // Ссылка на выпадающее меню для обработки клика вне его области
   const dropdownRef = useRef(null);
 
+  const navigate = useNavigate();
+
+  // Обработчики модального окна
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  // Обработчик успешного входа
   const handleLoginSuccess = (user) => {
-    setIsAuthenticated(true);
     const { last_name, first_name, middle_name, role, department } = user;
-    setFullName(`${last_name} ${first_name[0]}.${middle_name[0]}.`);
+    const formattedName = `${last_name} ${first_name[0]}.${middle_name[0]}.`;
+
+    setIsAuthenticated(true);
+    setFullName(formattedName);
     setUserRole(role);
     setUserDepartment(department);
     closeModal();
 
-    // Сохраняем данные аутентификации в localStorage
-    localStorage.setItem("isAuthenticated", true);
-    localStorage.setItem(
-      "fullName",
-      `${last_name} ${first_name[0]}.${middle_name[0]}.`
-    );
+    localStorage.setItem("isAuthenticated", "true");
+    localStorage.setItem("fullName", formattedName);
     localStorage.setItem("userRole", role);
     localStorage.setItem("userDepartment", department);
+
+    // Загружаем события после входа
+    fetchAllEvents();
   };
 
+  // Обработчик выхода
   const handleLogout = () => {
     setIsAuthenticated(false);
     setFullName("");
     setUserRole("");
     setUserDepartment("");
+    setEvents([]);
 
-    // Удаляем данные аутентификации из localStorage
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("fullName");
     localStorage.removeItem("userRole");
     localStorage.removeItem("userDepartment");
   };
 
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // Управление календарем
+  const toggleCalendar = () => setIsCalendarOpen(!isCalendarOpen);
 
-  const toggleCalendar = () => {
-    setIsCalendarOpen(!isCalendarOpen);
-  };
-
+  // Форматирование даты для запроса
   const getFormattedDate = (date) => {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Месяцы начинаются с 0
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return date.toISOString().split("T")[0]; // Формат YYYY-MM-DD
   };
 
-  const goToPreviousDay = () => {
-    const previousDay = new Date(currentDate);
-    previousDay.setDate(previousDay.getDate() - 1);
-    setCurrentDate(previousDay);
-    setSelectedDate(previousDay);
-  };
-
-  const goToNextDay = () => {
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(nextDay.getDate() + 1);
-    setCurrentDate(nextDay);
-    setSelectedDate(nextDay);
-  };
-
+  // Обработчик выбора даты
   const handleDateSelect = (date) => {
-    setCurrentDate(date);
     setSelectedDate(date);
+    setIsCalendarOpen(false);
+    // Не нужно загружать события здесь - мы уже загрузили все
   };
 
-  const fetchEvents = async () => {
+  // Загрузка ВСЕХ событий (а не только для выбранной даты)
+  const fetchAllEvents = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/events?event_date=${getFormattedDate(
-          selectedDate
-        )}`
-      );
+      const response = await fetch("http://localhost:3000/events");
       const data = await response.json();
-      setEvents(data);
+      setEvents(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching events:", error);
+      setEvents([]);
     }
   };
 
+  // Загружаем события при аутентификации
   useEffect(() => {
     if (isAuthenticated) {
-      fetchEvents();
+      fetchAllEvents();
     }
-  }, [isAuthenticated, selectedDate]);
+  }, [isAuthenticated]);
 
+  // Получаем события для выбранной даты
+  const getEventsForSelectedDate = useMemo(() => {
+    if (!selectedDate || !Array.isArray(events)) return [];
+
+    const dateStr = getFormattedDate(selectedDate);
+    return events.filter((event) => {
+      const eventDateStr = event.start_date
+        ? event.start_date.split("T")[0]
+        : event.event_date.split("T")[0];
+      return eventDateStr === dateStr;
+    });
+  }, [selectedDate, events]);
+
+  // Обработчики модальных окон событий
   const openEventDetailModal = (event) => {
     setSelectedEvent(event);
     setIsEventDetailModalOpen(true);
   };
 
-  const closeEventDetailModal = () => {
-    setSelectedEvent(null);
-    setIsEventDetailModalOpen(false);
-  };
+  const closeEventDetailModal = () => setIsEventDetailModalOpen(false);
 
-  const openCreateEventModal = () => {
-    setIsCreateEventModalOpen(true);
-  };
-
+  const openCreateEventModal = () => setIsCreateEventModalOpen(true);
   const closeCreateEventModal = () => {
     setIsCreateEventModalOpen(false);
   };
 
   const handleEventCreated = () => {
-    fetchEvents();
+    fetchAllEvents(); // Перезагружаем все события после создания нового
   };
 
-  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
-
+  // Управление админ-панелью
   const goToAdminPanel = () => {
     setIsAdminPanelOpen(true);
     navigate("/adminpanel");
@@ -148,12 +156,9 @@ const Main = () => {
     navigate("/");
   };
 
-  // Обработчик клика для переключения состояния выпадающего меню
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  // Управление выпадающим меню
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-  // Обработчик клика вне выпадающего меню
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsDropdownOpen(false);
@@ -167,47 +172,44 @@ const Main = () => {
     };
   }, []);
 
-  // Восстановление данных аутентификации при загрузке страницы
+  // Восстановление состояния при загрузке
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    const fullName = localStorage.getItem("fullName");
-    const userRole = localStorage.getItem("userRole");
-    const userDepartment = localStorage.getItem("userDepartment");
-
-    if (isAuthenticated) {
+    const auth = localStorage.getItem("isAuthenticated");
+    if (auth === "true") {
       setIsAuthenticated(true);
-      setFullName(fullName);
-      setUserRole(userRole);
-      setUserDepartment(userDepartment);
+      setFullName(localStorage.getItem("fullName") || "");
+      setUserRole(localStorage.getItem("userRole") || "");
+      setUserDepartment(localStorage.getItem("userDepartment") || "");
+      fetchAllEvents();
     }
   }, []);
 
   return (
     <main>
-      <body>
+      <div className="main-content">
         {!isAuthenticated ? (
           <button className="join-button" onClick={openModal}>
             Вход
           </button>
         ) : (
-          <div>
-            <div
-              className="dropdown"
-              ref={dropdownRef}
-              onClick={toggleDropdown}
-            >
-              <button className="dropbtn"> {fullName}</button>
-              <div className="dropdown-content">
-                <a href="#">Старый сайт</a>
-                <a href="#">Облако</a>
-                <a href="#">Карточка</a>
-                <a href="#">Портфолио</a>
-                <a href="#">Журнал</a>
-                <a href="#">Настройки</a>
-                <a onClick={handleLogout} href="#">
-                  Выйти
-                </a>
-              </div>
+          <div className="user-controls">
+            <div className="dropdown" ref={dropdownRef}>
+              <button className="dropbtn" onClick={toggleDropdown}>
+                {fullName}
+              </button>
+              {isDropdownOpen && (
+                <div className="dropdown-content">
+                  <a href="#">Старый сайт</a>
+                  <a href="#">Облако</a>
+                  <a href="#">Карточка</a>
+                  <a href="#">Портфолио</a>
+                  <a href="#">Журнал</a>
+                  <a href="#">Настройки</a>
+                  <a onClick={handleLogout} href="#">
+                    Выйти
+                  </a>
+                </div>
+              )}
             </div>
 
             {userRole === "admin" && (
@@ -217,50 +219,56 @@ const Main = () => {
             )}
           </div>
         )}
+
         <LoginModal
           isOpen={isModalOpen}
           onClose={closeModal}
           onLoginSuccess={handleLoginSuccess}
         />
+
         {isAuthenticated && (
-          <div className="list-banner">
+          <div className="content-area">
             <button className="calendar-button" onClick={toggleCalendar}>
               Календарь событий
             </button>
+
             <WorkList
-              className="work-list"
-              events={events}
               onEventClick={openEventDetailModal}
               currentDate={selectedDate}
               onDateSelect={handleDateSelect}
               isCalendarOpen={isCalendarOpen}
               toggleCalendar={toggleCalendar}
+              events={getEventsForSelectedDate} // Передаем только события для выбранной даты
             />
 
             {isCalendarOpen && (
-              <>
+              <div className="calendar-overlay">
                 <div className="overlay" onClick={toggleCalendar}></div>
                 <div className="calendar-container">
                   <Calendar
                     currentDate={currentDate}
                     selectedDate={selectedDate}
                     onDateSelect={handleDateSelect}
+                    events={events} // Передаем все события в календарь
                   />
                 </div>
-              </>
+              </div>
             )}
           </div>
         )}
+
         <EventDetailModal
           isOpen={isEventDetailModalOpen}
           onClose={closeEventDetailModal}
           event={selectedEvent}
         />
+
         <CreateEventModal
           isOpen={isCreateEventModalOpen}
-          onClose={closeCreateEventModal}
+          onRequestClose={closeCreateEventModal}
           onEventCreated={handleEventCreated}
         />
+
         {isAdminPanelOpen && (
           <div className="admin-panel">
             <button
@@ -269,10 +277,9 @@ const Main = () => {
             >
               Закрыть
             </button>
-            {/* Здесь будет содержимое админ-панели */}
           </div>
         )}
-      </body>
+      </div>
     </main>
   );
 };

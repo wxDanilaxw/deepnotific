@@ -1,0 +1,19 @@
+.3. Клонируйте репозиторий
+git clone https://github.com/ваш-username/my-react-project.git
+
+cd my-react-project
+
+npm install
+
+npm start
+
+
+Внесение изменений
+После внесения изменений добавьте их в индекс Git:
+git add .
+
+git commit -m "Описание изменений"
+
+git push origin main
+
+git pull origin main

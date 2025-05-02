@@ -40,6 +40,40 @@ module.exports = async () => {
         id_department INT REFERENCES departments(id_department) ON DELETE CASCADE,
         PRIMARY KEY (id_event, id_department)
       );
+
+
+      -- Добавляем тестовые отделы
+      INSERT INTO departments (department_name) VALUES 
+      ('Отдел разработки'),
+      ('Отдел маркетинга'),
+      ('Отдел продаж');
+
+      -- Добавляем тестового пользователя
+      INSERT INTO users (login_users, password_users, user_role) VALUES 
+      ('testuser', 'hashedpassword', 'user');
+
+      -- Добавляем тестовые мероприятия
+      INSERT INTO events (title, description, event_date, event_type, event_kind, start_date, end_date) VALUES 
+      ('Совещание по проекту', 'Обсуждение текущего состояния проекта', '2023-06-15', 'meeting', 'internal', '2023-06-15', '2023-06-15'),
+      ('Презентация продукта', 'Презентация нового продукта клиентам', '2023-06-20', 'presentation', 'external', '2023-06-20', '2023-06-20'),
+      ('Корпоративное мероприятие', 'Ежегодный корпоратив', '2023-06-25', 'event', 'internal', '2023-06-25', '2023-06-25'),
+      ('Важное объявление', 'Информация об изменениях в компании', '2023-06-01', 'announcement', 'internal', '2023-06-01', '2023-06-01');
+
+      -- Связываем мероприятия с отделами
+      INSERT INTO event_departments (id_event, id_department) VALUES 
+      (1, 1), -- Совещание для отдела разработки
+      (2, 2), -- Презентация для отдела маркетинга
+      (2, 3), -- Презентация для отдела продаж
+      (3, 1), -- Корпоратив для всех отделов
+      (3, 2),
+      (3, 3),
+      (4, 1),
+      (4, 2),
+      (4, 3);
+
+      -- Связываем пользователя с отделами
+      INSERT INTO user_departments (id_user, id_department) VALUES 
+      (1, 1); -- Пользователь в отделе разработки
   `);
     console.log("Таблицы созданы или уже существуют");
   } catch (err) {

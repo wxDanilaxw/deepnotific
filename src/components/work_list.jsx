@@ -27,6 +27,7 @@ const WorkList = ({
   }, []);
 
   // Функция для загрузки событий
+  // В WorkList.js замените fetchEvents на:
   const fetchEvents = async (date) => {
     try {
       const adjustedDate = new Date(date);
@@ -41,16 +42,15 @@ const WorkList = ({
       const events = response.data.map((event) => ({
         ...event,
         isFavorite: event.isFavorite || false,
-        date: event.date || formattedDate,
+        date: event.event_date || formattedDate,
       }));
 
       setTodos(events);
-      restoreFavorites(events); // Восстанавливаем избранное
+      restoreFavorites(events);
     } catch (error) {
       console.error("Error fetching events", error);
     }
   };
-
   // Переключение избранного
   const toggleFavorite = (id) => {
     const updatedTodos = todos.map((todo) =>
