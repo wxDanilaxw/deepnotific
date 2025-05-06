@@ -232,14 +232,16 @@ const Main = () => {
               Календарь событий
             </button>
 
-            <WorkList
-              onEventClick={openEventDetailModal}
-              currentDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              isCalendarOpen={isCalendarOpen}
-              toggleCalendar={toggleCalendar}
-              events={getEventsForSelectedDate} // Передаем только события для выбранной даты
-            />
+            <div className="margin-Worklist">
+              <WorkList
+                onEventClick={openEventDetailModal}
+                currentDate={selectedDate}
+                onDateSelect={handleDateSelect}
+                isCalendarOpen={isCalendarOpen}
+                toggleCalendar={toggleCalendar}
+                events={getEventsForSelectedDate} // Передаем только события для выбранной даты
+              />
+            </div>
 
             {isCalendarOpen && (
               <div className="calendar-overlay">

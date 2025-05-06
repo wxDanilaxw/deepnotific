@@ -1,72 +1,190 @@
 /* EventDetailModal.css */
+
+/* Анимации */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Оверлей с плавным появлением */
 .event-detail-modal-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.75);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
 }
 
+.event-detail-modal-overlay.visible {
+  opacity: 1;
+}
+
+/* Контент модального окна с анимацией */
 .event-detail-modal-content {
-	background-color: white;
-	padding: 20px;
-	border-radius: 10px;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	width: 500px;
-	position: relative;
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 500px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modalFadeIn 0.3s ease-out forwards;
+  transform-origin: center;
+  transition: all 0.3s ease;
 }
 
+.event-detail-modal-content.closing {
+  animation: modalFadeOut 0.3s ease-in forwards;
+}
+
+/* Кнопка закрытия */
 .event-detail-modal-close-btn {
-	position: absolute;
-	top: 10px;
-	right: 10px;
-	background: none;
-	border: none;
-	font-size: 24px;
-	cursor: pointer;
-	color: #333;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 
 .event-detail-modal-close-btn:hover {
-	color: #6161fa;
+  color: #6161fa;
+  background-color: rgba(97, 97, 250, 0.1);
+  transform: rotate(90deg);
 }
 
+/* Детали мероприятия */
 .event-detail-modal-details {
-	display: flex;
-	flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .event-detail-modal-item {
-	display: flex;
-	align-items: center;
-	margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .event-detail-modal-item label {
-	font-weight: bold;
-	margin-right: 10px;
-	width: 200px;
+  font-weight: 600;
+  margin-right: 12px;
+  width: 180px;
+  color: #444;
+  font-size: 0.95rem;
+  flex-shrink: 0;
 }
 
 .event-detail-modal-item p {
-	margin: 0;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
+/* Кнопка закрытия внизу */
 .event-detail-modal-close-button {
-	margin-top: 20px;
-	padding: 10px 20px;
-	background-color: #6161fa;
-	color: white;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
+  margin-top: 25px;
+  padding: 10px 24px;
+  background-color: #6161fa;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  align-self: flex-end;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .event-detail-modal-close-button:hover {
-	background-color: #4a4af5;
+  background-color: #4a4af5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.event-detail-modal-close-button:active {
+  transform: translateY(0);
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+  .event-detail-modal-content {
+    padding: 20px 15px;
+    width: 95%;
+  }
+
+  .event-detail-modal-item {
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
+  }
+
+  .event-detail-modal-item label {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 5px;
+  }
+
+  .event-detail-modal-item p {
+    width: 100%;
+    padding-left: 8px;
+  }
+
+  .event-detail-modal-close-button {
+    width: 100%;
+    margin-top: 15px;
+  }
+}
+
+@media (max-width: 400px) {
+  .event-detail-modal-content {
+    padding: 18px 12px;
+  }
+
+  .event-detail-modal-close-btn {
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+  }
 }

@@ -1,535 +1,350 @@
-import React, { useState, useEffect } from "react";
-import PropTypes from "prop-types";
+import React, { useState } from "react";
 import Modal from "react-modal";
+import { Button, Form, Alert, Spinner } from "react-bootstrap";
 import axios from "axios";
-import Select from "react-select";
+import "./CreateEventModal.css";
 
 Modal.setAppElement("#root");
 
-const CreateEventModal = ({ isOpen, onRequestClose, onEventCreated }) => {
+const CreateEventModal = ({ isOpen, onClose, onSuccess, departments = [] }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    eventType: "",
-    eventKind: "",
-    startDate: "",
-    endDate: "",
+    event_type: "",
+    event_kind: "",
+    start_date: "",
+    end_date: "",
+    start_time: "",
+    end_time: "",
+    departments: [],
     status: true,
-    selectedDepartments: [],
-    notifiedUsers: [],
   });
+  const [files, setFiles] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [allDepartments, setAllDepartments] = useState([]);
-  const [usersInSelectedDepartments, setUsersInSelectedDepartments] = useState(
-    []
-  );
-  const [loading, setLoading] = useState({
-    departments: false,
-    users: false,
-    submitting: false,
-  });
-  const [error, setError] = useState(null);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [networkStatus, setNetworkStatus] = useState(navigator.onLine);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  // Проверка соединения с интернетом
-  useEffect(() => {
-    const handleOnline = () => setNetworkStatus(true);
-    const handleOffline = () => setNetworkStatus(false);
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    const validFiles = selectedFiles.filter(
+      (file) => file.size <= 15 * 1024 * 1024
+    );
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  // Загрузка отделов
-  useEffect(() => {
-    if (isOpen && networkStatus) {
-      const fetchDepartments = async () => {
-        setLoading((prev) => ({ ...prev, departments: true }));
-        try {
-          const response = await axios.get(
-            "http://localhost:3000/departments",
-            {
-              timeout: 5000,
-            }
-          );
-          setAllDepartments(response.data);
-          setError(null);
-        } catch (err) {
-          console.error("Error fetching departments:", err);
-          setError(err.message || "Ошибка при загрузке отделов");
-        } finally {
-          setLoading((prev) => ({ ...prev, departments: false }));
-        }
-      };
-
-      fetchDepartments();
-    }
-  }, [isOpen, networkStatus]);
-
-  // Загрузка пользователей при изменении выбранных отделов
-  useEffect(() => {
-    if (formData.selectedDepartments.length > 0 && networkStatus) {
-      const fetchUsers = async () => {
-        setLoading((prev) => ({ ...prev, users: true }));
-        try {
-          const response = await axios.get(
-            `http://localhost:3000/users?department_id=${formData.selectedDepartments.join(
-              ","
-            )}`,
-            { timeout: 5000 }
-          );
-          setUsersInSelectedDepartments(response.data);
-          setError(null);
-        } catch (err) {
-          console.error("Error fetching users:", err);
-          setError(err.message || "Ошибка при загрузке пользователей");
-        } finally {
-          setLoading((prev) => ({ ...prev, users: false }));
-        }
-      };
-
-      fetchUsers();
+    if (selectedFiles.length !== validFiles.length) {
+      setError("Некоторые файлы превышают максимальный размер 15MB");
     } else {
-      setUsersInSelectedDepartments([]);
-    }
-  }, [formData.selectedDepartments, networkStatus]);
-
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleNext();
-    }
-  };
-
-  const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => prev + 1);
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentStep((prev) => prev - 1);
-  };
-
-  const validateStep = (step) => {
-    const {
-      title,
-      eventType,
-      eventKind,
-      startDate,
-      endDate,
-      selectedDepartments,
-    } = formData;
-
-    switch (step) {
-      case 1:
-        if (!title.trim()) {
-          setError('Заполните поле "Заголовок"');
-          return false;
-        }
-        break;
-      case 2:
-        if (!eventType) {
-          setError('Выберите "Тип мероприятия"');
-          return false;
-        }
-        break;
-      case 3:
-        if (!eventKind) {
-          setError('Выберите "Вид мероприятия"');
-          return false;
-        }
-        break;
-      case 4:
-        if (!startDate) {
-          setError('Укажите "Дату начала"');
-          return false;
-        }
-        if (new Date(startDate) < new Date()) {
-          setError("Дата начала не может быть в прошлом");
-          return false;
-        }
-        break;
-      case 5:
-        if (!endDate) {
-          setError('Укажите "Дату окончания"');
-          return false;
-        }
-        if (new Date(startDate) > new Date(endDate)) {
-          setError("Дата начала не может быть позже даты окончания");
-          return false;
-        }
-        break;
-      case 6:
-        if (selectedDepartments.length === 0) {
-          setError("Выберите хотя бы один отдел");
-          return false;
-        }
-        break;
-      default:
-        break;
+      setError("");
     }
 
-    setError(null);
-    return true;
+    setFiles(validFiles);
   };
 
-  const handleSubmit = async () => {
-    if (!networkStatus) {
-      setError("Нет подключения к интернету");
-      return;
-    }
-
-    if (!validateStep(currentStep)) return;
-
-    setLoading((prev) => ({ ...prev, submitting: true }));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const eventData = {
-        title: formData.title,
-        description: formData.description,
-        event_type: formData.eventType,
-        event_kind: formData.eventKind,
-        start_date: formData.startDate,
-        end_date: formData.endDate,
-        status: formData.status,
-        departments: formData.selectedDepartments,
-        notified_users: formData.notifiedUsers,
-        user_role: "admin",
-      };
+      // Валидация
+      if (
+        !formData.title ||
+        !formData.event_type ||
+        !formData.event_kind ||
+        !formData.start_date ||
+        !formData.end_date
+      ) {
+        throw new Error("Заполните все обязательные поля");
+      }
 
+      const formDataToSend = new FormData();
+
+      // Добавляем текстовые данные
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value !== "" && value !== null) {
+          formDataToSend.append(
+            key,
+            key === "departments" ? JSON.stringify(value) : value
+          );
+        }
+      });
+
+      // Добавляем файлы
+      files.forEach((file) => {
+        formDataToSend.append("files", file);
+      });
+
+      // Отправка данных
       const response = await axios.post(
         "http://localhost:3000/events",
-        eventData,
+        formDataToSend,
         {
-          timeout: 10000,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          timeout: 10000, // 10 секунд таймаут
         }
       );
 
-      console.log("Event created successfully:", response.data);
-      onEventCreated();
-      onRequestClose();
-      resetForm();
+      if (response.status === 201) {
+        onSuccess();
+        onClose();
+        // Сброс формы
+        setFormData({
+          title: "",
+          description: "",
+          event_type: "",
+          event_kind: "",
+          start_date: "",
+          end_date: "",
+          start_time: "",
+          end_time: "",
+          departments: [],
+          status: true,
+        });
+        setFiles([]);
+      }
     } catch (err) {
-      console.error("Error creating event:", err);
+      console.error("Ошибка создания события:", err);
       setError(
-        err.response?.data?.error ||
+        err.response?.data?.message ||
           err.message ||
-          "Ошибка при создании события"
+          "Произошла ошибка при создании события"
       );
     } finally {
-      setLoading((prev) => ({ ...prev, submitting: false }));
+      setLoading(false);
     }
   };
-
-  const resetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      eventType: "",
-      eventKind: "",
-      startDate: "",
-      endDate: "",
-      status: true,
-      selectedDepartments: [],
-      notifiedUsers: [],
-    });
-    setCurrentStep(1);
-    setError(null);
-  };
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="step" aria-labelledby="title-label">
-            <label id="title-label" className="label-title">
-              Заголовок:
-            </label>
-            <input
-              className="input-title"
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              onKeyPress={handleKeyPress}
-              required
-              aria-required="true"
-              aria-invalid={!formData.title}
-            />
-          </div>
-        );
-      case 2:
-        return (
-          <div className="step" aria-labelledby="event-type-label">
-            <label id="event-type-label" className="label-event-type">
-              Тип мероприятия:
-            </label>
-            <select
-              className="input-event-type"
-              value={formData.eventType}
-              onChange={(e) => handleInputChange("eventType", e.target.value)}
-              onKeyPress={handleKeyPress}
-              required
-              aria-required="true"
-              aria-invalid={!formData.eventType}
-            >
-              <option value="">Выберите тип</option>
-              <option value="online">Онлайн</option>
-              <option value="offline">Офлайн</option>
-              <option value="remote">Заочное</option>
-            </select>
-          </div>
-        );
-      case 3:
-        return (
-          <div className="step" aria-labelledby="event-kind-label">
-            <label id="event-kind-label" className="label-event-kind">
-              Вид мероприятия:
-            </label>
-            <select
-              className="input-event-kind"
-              value={formData.eventKind}
-              onChange={(e) => handleInputChange("eventKind", e.target.value)}
-              onKeyPress={handleKeyPress}
-              required
-              aria-required="true"
-              aria-invalid={!formData.eventKind}
-            >
-              <option value="">Выберите вид</option>
-              <option value="conference">Конференция</option>
-              <option value="call">Созвон</option>
-              <option value="meeting">Сбор</option>
-              <option value="hall_event">Мероприятие в актовом зале</option>
-            </select>
-          </div>
-        );
-      case 4:
-        return (
-          <div className="step" aria-labelledby="start-date-label">
-            <label id="start-date-label" className="label-start-date">
-              Дата начала:
-            </label>
-            <input
-              className="input-start-date"
-              type="date"
-              value={formData.startDate}
-              onChange={(e) => handleInputChange("startDate", e.target.value)}
-              onKeyPress={handleKeyPress}
-              required
-              aria-required="true"
-              aria-invalid={!formData.startDate}
-              min={new Date().toISOString().split("T")[0]}
-            />
-          </div>
-        );
-      case 5:
-        return (
-          <div className="step" aria-labelledby="end-date-label">
-            <label id="end-date-label" className="label-end-date">
-              Дата окончания:
-            </label>
-            <input
-              className="input-end-date"
-              type="date"
-              value={formData.endDate}
-              onChange={(e) => handleInputChange("endDate", e.target.value)}
-              onKeyPress={handleKeyPress}
-              required
-              aria-required="true"
-              aria-invalid={!formData.endDate}
-              min={formData.startDate || new Date().toISOString().split("T")[0]}
-            />
-          </div>
-        );
-      case 6:
-        return (
-          <div className="step" aria-labelledby="departments-label">
-            <label id="departments-label" className="label-departments">
-              Отделы:
-            </label>
-            {loading.departments ? (
-              <p>Загрузка отделов...</p>
-            ) : allDepartments.length > 0 ? (
-              <Select
-                isMulti
-                options={allDepartments.map((department) => ({
-                  value: department.id_department,
-                  label: department.department_name,
-                }))}
-                value={formData.selectedDepartments.map((id) => ({
-                  value: id,
-                  label: allDepartments.find((dep) => dep.id_department === id)
-                    .department_name,
-                }))}
-                onChange={(selectedOptions) => {
-                  handleInputChange(
-                    "selectedDepartments",
-                    selectedOptions.map((option) => option.value)
-                  );
-                }}
-                placeholder="Выберите отделы"
-                aria-label="Выберите отделы"
-              />
-            ) : (
-              <p>Отделы не загружены</p>
-            )}
-          </div>
-        );
-      case 7:
-        return (
-          <div className="step" aria-labelledby="users-label">
-            <label id="users-label" className="label-notified-users">
-              Пользователи для уведомления:
-            </label>
-            {loading.users ? (
-              <p>Загрузка пользователей...</p>
-            ) : usersInSelectedDepartments.length > 0 ? (
-              <div className="users-list">
-                {usersInSelectedDepartments.map((user) => (
-                  <div key={user.id_user} className="user-item">
-                    <input
-                      type="checkbox"
-                      id={`user-${user.id_user}`}
-                      checked={formData.notifiedUsers.includes(user.id_user)}
-                      onChange={() => {
-                        handleInputChange(
-                          "notifiedUsers",
-                          formData.notifiedUsers.includes(user.id_user)
-                            ? formData.notifiedUsers.filter(
-                                (id) => id !== user.id_user
-                              )
-                            : [...formData.notifiedUsers, user.id_user]
-                        );
-                      }}
-                      aria-labelledby={`user-label-${user.id_user}`}
-                    />
-                    <label
-                      id={`user-label-${user.id_user}`}
-                      htmlFor={`user-${user.id_user}`}
-                    >
-                      {user.login_users} ({user.last_name} {user.first_name})
-                    </label>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>
-                {formData.selectedDepartments.length > 0
-                  ? "В выбранных отделах нет пользователей"
-                  : "Выберите отделы для отображения пользователей"}
-              </p>
-            )}
-          </div>
-        );
-      case 8:
-        return (
-          <div className="step" aria-labelledby="description-label">
-            <label id="description-label" className="label-description">
-              Описание мероприятия:
-            </label>
-            <textarea
-              placeholder="Описание мероприятия"
-              className="input-description-create"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              onKeyPress={handleKeyPress}
-              aria-labelledby="description-label"
-            />
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <Modal
       isOpen={isOpen}
-      onRequestClose={() => {
-        resetForm();
-        onRequestClose();
-      }}
-      contentLabel="Создать событие"
-      className="modal"
-      overlayClassName="overlay"
-      aria-modal="true"
-      role="dialog"
+      onRequestClose={onClose}
+      className="custom-modal"
+      overlayClassName="modal-overlay"
+      contentLabel="Создание события"
+      closeTimeoutMS={300}
     >
-      <button
-        className="close-button"
-        onClick={() => {
-          resetForm();
-          onRequestClose();
-        }}
-        aria-label="Закрыть модальное окно"
-      >
-        ×
-      </button>
+      <div className="modal-header">
+        <h3 className="modal-title">Создание нового события</h3>
+        <button className="modal-close-btn" onClick={onClose}>
+          &times;
+        </button>
+      </div>
 
-      <h2>Создание нового события</h2>
-
-      {!networkStatus && (
-        <div className="error-message" role="alert">
-          Внимание: отсутствует подключение к интернету. Некоторые функции могут
-          быть недоступны.
-        </div>
-      )}
-
-      {error && (
-        <div className="error-message" role="alert">
-          {error}
-        </div>
-      )}
-
-      <div className="step-indicator">Шаг {currentStep} из 8</div>
-
-      {renderStep()}
-
-      <div className="navigation-buttons">
-        {currentStep > 1 && (
-          <button
-            className="button-back"
-            onClick={handleBack}
-            disabled={loading.submitting}
-          >
-            Назад
-          </button>
+      <div className="modal-body">
+        {error && (
+          <Alert variant="danger" className="error-alert">
+            {error}
+          </Alert>
         )}
-        {currentStep < 8 ? (
-          <button
-            className="button-next"
-            onClick={handleNext}
-            disabled={loading.submitting}
-          >
-            Далее
-          </button>
-        ) : (
-          <button
-            className="button-submit"
-            onClick={handleSubmit}
-            disabled={loading.submitting}
-          >
-            {loading.submitting ? "Создание..." : "Создать"}
-          </button>
-        )}
+
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3 form-group">
+            <Form.Label className="form-label">Название *</Form.Label>
+            <Form.Control
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="form-control"
+              placeholder="Введите название события"
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3 form-group">
+            <Form.Label className="form-label">Описание</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="Добавьте описание события"
+            />
+          </Form.Group>
+
+          <div className="row mb-3">
+            <Form.Group className="col-md-6 form-group">
+              <Form.Label className="form-label">Тип события *</Form.Label>
+              <Form.Select
+                name="event_type"
+                value={formData.event_type}
+                onChange={handleChange}
+                required
+                className="form-select"
+              >
+                <option value="">Выберите тип</option>
+                <option value="meeting">Совещание</option>
+                <option value="training">Обучение</option>
+                <option value="event">Мероприятие</option>
+                <option value="other">Другое</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="col-md-6 form-group">
+              <Form.Label className="form-label">Вид события *</Form.Label>
+              <Form.Select
+                name="event_kind"
+                value={formData.event_kind}
+                onChange={handleChange}
+                required
+                className="form-select"
+              >
+                <option value="">Выберите вид</option>
+                <option value="internal">Внутреннее</option>
+                <option value="external">Внешнее</option>
+              </Form.Select>
+            </Form.Group>
+          </div>
+
+          <div className="row mb-3">
+            <Form.Group className="col-md-6 form-group">
+              <Form.Label className="form-label">Начало периода *</Form.Label>
+              <Form.Control
+                type="date"
+                name="start_date"
+                value={formData.start_date}
+                onChange={handleChange}
+                required
+                className="form-control"
+              />
+            </Form.Group>
+
+            <Form.Group className="col-md-6 form-group">
+              <Form.Label className="form-label">Конец периода *</Form.Label>
+              <Form.Control
+                type="date"
+                name="end_date"
+                value={formData.end_date}
+                onChange={handleChange}
+                required
+                className="form-control"
+              />
+            </Form.Group>
+          </div>
+
+          <div className="row mb-3">
+            <Form.Group className="col-md-6 form-group">
+              <Form.Label className="form-label">Время начала</Form.Label>
+              <Form.Control
+                type="time"
+                name="start_time"
+                value={formData.start_time}
+                onChange={handleChange}
+                className="form-control"
+              />
+            </Form.Group>
+
+            <Form.Group className="col-md-6 form-group">
+              <Form.Label className="form-label">Время окончания</Form.Label>
+              <Form.Control
+                type="time"
+                name="end_time"
+                value={formData.end_time}
+                onChange={handleChange}
+                className="form-control"
+              />
+            </Form.Group>
+          </div>
+
+          <Form.Group className="mb-3 form-group">
+            <Form.Label className="form-label">Отделы</Form.Label>
+            <Form.Select
+              multiple
+              name="departments"
+              value={formData.departments}
+              onChange={(e) => {
+                const options = Array.from(
+                  e.target.selectedOptions,
+                  (option) => option.value
+                );
+                setFormData((prev) => ({ ...prev, departments: options }));
+              }}
+              className="form-select departments-select"
+              size="3"
+            >
+              {departments.map((dept) => (
+                <option key={dept.id_department} value={dept.id_department}>
+                  {dept.department_name}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-3 form-group">
+            <Form.Label className="form-label">
+              Прикрепленные файлы (до 15MB каждый)
+            </Form.Label>
+            <Form.Control
+              type="file"
+              multiple
+              onChange={handleFileChange}
+              className="file-input"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            />
+            {files.length > 0 && (
+              <div className="file-list mt-2">
+                <strong>Выбранные файлы:</strong>
+                <ul className="file-list-items">
+                  {files.map((file, index) => (
+                    <li key={index} className="file-item">
+                      <span className="file-name">{file.name}</span>
+                      <span className="file-size">
+                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </Form.Group>
+
+          <Form.Group className="mb-3 form-group status-group">
+            <Form.Check
+              type="switch"
+              id="status-switch"
+              label="Активное событие"
+              checked={formData.status}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, status: e.target.checked }))
+              }
+              className="status-switch"
+            />
+          </Form.Group>
+
+          <div className="form-actions">
+            <Button
+              variant="secondary"
+              onClick={onClose}
+              className="cancel-btn"
+            >
+              Отмена
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={loading}
+              className="submit-btn"
+            >
+              {loading ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Создание...
+                </>
+              ) : (
+                "Создать"
+              )}
+            </Button>
+          </div>
+        </Form>
       </div>
     </Modal>
   );
-};
-
-CreateEventModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onRequestClose: PropTypes.func.isRequired,
-  onEventCreated: PropTypes.func.isRequired,
 };
 
 export default CreateEventModal;

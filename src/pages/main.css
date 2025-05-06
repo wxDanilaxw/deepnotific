@@ -35,14 +35,16 @@ body {
 }
 
 .calendar-button {
+  position: absolute;
+  margin-left: 1700px;
   font-family: "RobotoM";
   font-size: 16px;
-  margin-top: 80px;
+  margin-top: 105px;
   justify-content: center;
   display: flex;
   align-items: center;
   width: 220px;
-  height: 45px;
+  height: 53px;
   background-color: #6161fa;
   color: white;
   border-radius: 5px;
@@ -157,7 +159,7 @@ td {
 }
 
 .admin-panel-button {
-  position: fixed;
+  position: absolute;
   color: #e6dddd;
   background-color: #6161fa;
   border: none;
@@ -192,4 +194,10 @@ td {
   height: 100%;
   background: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
   z-index: 999; /* Под календарем, но поверх других элементов */
+}
+
+.margin-Worklist {
+  margin-left: 1700px;
+  margin-top: 170px;
+  position: absolute;
 }

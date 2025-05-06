@@ -22,19 +22,20 @@ module.exports = async () => {
       );
 
       CREATE TABLE IF NOT EXISTS events (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        event_date DATE NOT NULL,
-        event_type VARCHAR(50) NOT NULL,
-        event_kind VARCHAR(50) NOT NULL,
-        start_date DATE NOT NULL,
-        end_date DATE NOT NULL,
-        status BOOLEAN NOT NULL DEFAULT TRUE,
-        notified_users INTEGER[] DEFAULT '{}'
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      event_date DATE NOT NULL,
+      event_type VARCHAR(50) NOT NULL,
+      event_kind VARCHAR(50) NOT NULL,
+      start_date DATE NOT NULL,
+      end_date DATE NOT NULL,
+      start_time TIME,
+      end_time TIME,
+      status BOOLEAN NOT NULL DEFAULT TRUE,
+      notified_users INTEGER[] DEFAULT '{}'
       );
-
       CREATE TABLE IF NOT EXISTS event_departments (
         id_event INT REFERENCES events(id) ON DELETE CASCADE,
         id_department INT REFERENCES departments(id_department) ON DELETE CASCADE,
