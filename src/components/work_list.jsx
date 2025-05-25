@@ -10,61 +10,41 @@ const WorkList = ({
   onDateSelect,
   isCalendarOpen,
   toggleCalendar,
+  events,
+  userRole
 }) => {
   const [todos, setTodos] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [showFavorites, setShowFavorites] = useState(false);
 
-  // Загрузка событий при изменении currentDate
   useEffect(() => {
-    fetchEvents(currentDate);
-  }, [currentDate]);
+    if (events) {
+      const eventsWithFavorites = events.map(event => ({
+        ...event,
+        isFavorite: favorites.some(fav => fav.id_event === event.id_event)
+      }));
+      setTodos(eventsWithFavorites);
+    }
+  }, [events, favorites]);
 
-  // Загрузка избранного из localStorage при монтировании компонента
   useEffect(() => {
     const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
     setFavorites(storedFavorites);
   }, []);
 
-  // Функция для загрузки событий
-  // В WorkList.js замените fetchEvents на:
-  const fetchEvents = async (date) => {
-    try {
-      const adjustedDate = new Date(date);
-      adjustedDate.setDate(adjustedDate.getDate());
-      const formattedDate = adjustedDate.toISOString().split("T")[0];
-
-      const response = await axios.get(
-        `http://localhost:3000/events?event_date=${formattedDate}`
-      );
-
-      // Обработка данных: добавляем isFavorite, если его нет
-      const events = response.data.map((event) => ({
-        ...event,
-        isFavorite: event.isFavorite || false,
-        date: event.event_date || formattedDate,
-      }));
-
-      setTodos(events);
-      restoreFavorites(events);
-    } catch (error) {
-      console.error("Error fetching events", error);
-    }
-  };
-  // Переключение избранного
   const toggleFavorite = (id) => {
     const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, isFavorite: !todo.isFavorite } : todo
+      todo.id_event === id ? { ...todo, isFavorite: !todo.isFavorite } : todo
     );
 
-    const todo = updatedTodos.find((todo) => todo.id === id);
-    if (!todo) return; // Если todo не найден, выходим
+    const todo = updatedTodos.find((todo) => todo.id_event === id);
+    if (!todo) return;
 
     if (todo.isFavorite) {
       setFavorites((prevFavorites) => [...prevFavorites, todo]);
     } else {
       setFavorites((prevFavorites) =>
-        prevFavorites.filter((fav) => fav.id !== id)
+        prevFavorites.filter((fav) => fav.id_event !== id)
       );
     }
 
@@ -72,32 +52,16 @@ const WorkList = ({
     saveFavorites();
   };
 
-  // Сохранение избранного в localStorage
   const saveFavorites = () => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   };
 
-  // Восстановление избранного
-  const restoreFavorites = (events) => {
-    const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
-
-    // Обновляем todos, чтобы отобразить избранные элементы
-    const updatedTodos = events.map((event) => {
-      const isFavorite = storedFavorites.some((fav) => fav.id === event.id);
-      return { ...event, isFavorite };
-    });
-
-    setTodos(updatedTodos);
-  };
-
-  // Переход к предыдущему дню
   const goToPreviousDay = () => {
     const previousDay = new Date(currentDate);
     previousDay.setDate(previousDay.getDate() - 1);
     onDateSelect(previousDay);
   };
 
-  // Переход к следующему дню
   const goToNextDay = () => {
     const nextDay = new Date(currentDate);
     nextDay.setDate(nextDay.getDate() + 1);
@@ -140,6 +104,7 @@ const WorkList = ({
           todos={todos}
           onToggleFavorite={toggleFavorite}
           onEventClick={onEventClick}
+          userRole={userRole}
         />
       )}
     </div>

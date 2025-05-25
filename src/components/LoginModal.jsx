@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Modal from './AuthModal';
+import { login } from '../utils/api';
 import './loginModal.css';
 
 const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
@@ -14,28 +15,15 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          login_users: username,
-          password_users: password
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Ошибка авторизации');
-      }
-
-      if (!data.user) {
+      const data = await login({ login: username, password });
+      
+      if (!data.token || !data.user) {
         throw new Error('Неверный формат ответа сервера');
       }
 
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
       onLoginSuccess(data);
       onClose();
     } catch (err) {

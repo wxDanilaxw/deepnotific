@@ -174,18 +174,7 @@ td {
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-.calendar-container {
-  position: fixed; /* Фиксированное позиционирование */
-  top: 50%; /* Сдвигаем на 50% от верха */
-  left: 50%; /* Сдвигаем на 50% от левого края */
-  transform: translate(-50%, -50%); /* Центрируем */
-  z-index: 1000; /* Убедитесь, что календарь поверх других элементов */
-  background: white; /* Фон календаря */
-  padding: 20px; /* Отступы внутри календаря */
-  border-radius: 10px; /* Скругление углов */
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Тень */
-  z-index: 100; /* Вместо 1000 */
-}
+
 
 .overlay {
   position: fixed;
@@ -194,11 +183,56 @@ td {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
-  z-index: 999; /* Под календарем, но поверх других элементов */
+ 
 }
 
 .margin-Worklist {
   margin-left: 1700px;
   margin-top: 170px;
   position: absolute;
+}
+
+.calendar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.calendar-container {
+  position: relative;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 1400px;
+  max-width: 90vw;
+  height: 670px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.close-calendar-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1003;
+  color: #6161fa;
 }

@@ -1,196 +1,255 @@
-/* Обновлённый компонент календаря */
+.calendar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 .calendar-container {
   display: flex;
   width: 1400px;
+  max-width: calc(100% - 40px);
   height: 670px;
-  font-family: Arial, sans-serif;
-  border-radius: 8px;
+  max-height: calc(100vh - 40px);
+  background: white;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  margin: auto;
 }
 
-/* Основная панель календаря */
 .calendar {
-  width: 800px;
-  background: #fff;
-  border-right: 1px solid #eee;
+  width: 60%;
   display: flex;
   flex-direction: column;
+  border-right: 1px solid #eee;
 }
 
-/* Заголовок календаря */
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 25px;
+  padding: 15px 20px;
   background-color: #6161fa;
   color: white;
 }
 
-.calendar-header button {
-  background: none;
+.calendar-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.month-nav-button {
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  font-size: 20px;
+  font-size: 1.2rem;
+  padding: 5px 15px;
+  border-radius: 5px;
   cursor: pointer;
-  padding: 8px 20px;
-  border-radius: 6px;
   transition: background 0.2s;
 }
 
-.calendar-header button:hover {
-  background: rgba(255, 255, 255, 0.15);
+.month-nav-button:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Дни недели */
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: #f8f9fa;
-  padding: 12px 0;
-  font-weight: 600;
-  color: #6c757d;
-  border-bottom: 1px solid #eee;
+  background: #f5f5f5;
+  padding: 10px 0;
+  text-align: center;
+  font-weight: bold;
 }
 
 /* Сетка дней */
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  flex-grow: 1;
   gap: 1px;
   background: #eee;
-  flex-grow: 1;
   padding: 1px;
 }
 
-/* Стили дня */
 .calendar-day {
   position: relative;
-  padding: 15px;
-  background: white;
   min-height: 80px;
+  background: white;
+  padding: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .calendar-day:hover {
-  background: #f8f9fa;
-  z-index: 2;
+  background: #f9f9f9;
   transform: scale(1.02);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1;
 }
 
 .calendar-day.selected {
-  border: 3px solid #ff4444;
-  z-index: 3;
+  border: 2px solid #6161fa;
+  z-index: 2;
 }
 
-.calendar-day.prev-month,
-.calendar-day.next-month {
-  color: #ccc;
-  background: #fcfcfc;
+.calendar-day.today {
+  background: #f0f7ff;
 }
 
-/* Точка события */
+.day-number {
+  font-weight: bold;
+}
+
 .event-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: #6161fa;
   border-radius: 50%;
-  margin-top: 5px;
-  position: absolute;
-  bottom: 5px;
+  margin-top: 3px;
 }
 
 /* Панель событий */
 .events-panel {
-  width: 600px;
-  background: white;
+  width: 40%;
   display: flex;
   flex-direction: column;
 }
 
-.title-event-panel {
-  margin-left: 20px;
+.selected-date-title {
+  padding: 15px 20px;
+  margin: 0;
+  background: #f5f5f5;
+  font-size: 1.2rem;
 }
 
-/* Вкладки */
 .tabs {
   display: flex;
-  background: #6161fa;
+  border-bottom: 1px solid #ddd;
 }
 
 .tab {
   flex: 1;
-  padding: 15px;
+  padding: 12px;
   border: none;
   background: transparent;
-  color: white;
-  font-size: 16px;
   cursor: pointer;
-  transition: background 0.2s;
+  font-weight: 500;
 }
 
 .tab.active {
-  background: rgba(0, 0, 0, 0.15);
-  font-weight: 600;
+  border-bottom: 2px solid #6161fa;
+  color: #6161fa;
 }
 
-/* Содержимое вкладок */
 .tab-content {
-  padding: 20px;
-  overflow-y: auto;
   flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
 }
 
-/* Элементы событий */
+/* Стили событий */
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .event-item {
-  padding: 15px;
-  margin-bottom: 15px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border-left: 4px solid #6161fa;
+  padding: 12px;
+  border-radius: 5px;
+  background: #f9f9f9;
+  border-left: 3px solid #6161fa;
+  cursor: pointer;
   transition: transform 0.2s;
 }
 
 .event-item:hover {
-  transform: translateX(5px);
+  transform: translateX(3px);
+  background: #f0f0f0;
 }
 
 .event-item h4 {
-  margin: 0 0 8px 0;
+  margin: 0 0 5px 0;
   color: #333;
-  font-size: 16px;
 }
 
 .event-item p {
   margin: 0 0 5px 0;
   color: #666;
-  font-size: 14px;
+  font-size: 0.9rem;
 }
 
 .event-time {
   color: #6161fa;
+  font-size: 0.8rem;
   font-weight: 500;
-  font-size: 13px;
 }
 
-/* Адаптивные элементы */
+.no-events {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+/* Заметки */
+.notes-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.notes-textarea {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+  margin-bottom: 10px;
+}
+
+.save-notes-btn {
+  align-self: flex-end;
+  padding: 8px 15px;
+  background: #6161fa;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Модальное окно (уменьшенное) */
+.event-detail-modal-smaller .event-detail-modal-content {
+  width: 70%;
+  max-width: 700px;
+}
+
+/* Адаптивность */
 @media (max-width: 1200px) {
   .calendar-container {
-    width: 100%;
-    height: auto;
     flex-direction: column;
+    height: 90vh;
   }
-
-  .calendar,
+  
+  .calendar, 
   .events-panel {
     width: 100%;
-    height: auto;
+  }
+  
+  .calendar {
+    border-right: none;
+    border-bottom: 1px solid #eee;
   }
 }
