@@ -184,6 +184,7 @@ td {
   padding: 20px; /* Отступы внутри календаря */
   border-radius: 10px; /* Скругление углов */
   box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2); /* Тень */
+  z-index: 100; /* Вместо 1000 */
 }
 
 .overlay {

@@ -36,6 +36,7 @@ module.exports = async () => {
       status BOOLEAN NOT NULL DEFAULT TRUE,
       notified_users INTEGER[] DEFAULT '{}'
       );
+      
       CREATE TABLE IF NOT EXISTS event_departments (
         id_event INT REFERENCES events(id) ON DELETE CASCADE,
         id_department INT REFERENCES departments(id_department) ON DELETE CASCADE,

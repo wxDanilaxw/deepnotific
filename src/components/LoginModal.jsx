@@ -1,98 +1,95 @@
-import React, { useState } from 'react'
-import Modal from './AuthModal'
-import './loginModal.css'
+import React, { useState } from 'react';
+import Modal from './AuthModal';
+import './loginModal.css';
 
 const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
-	const [username, setUsername] = useState('')
-	const [password, setPassword] = useState('')
-	const [error, setError] = useState('')
-	const [successMessage, setSuccessMessage] = useState('')
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-	const handleSubmit = async e => {
-		e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-		try {
-			console.log('Sending login request with:', {
-				login_users: username,
-				password_users: password,
-			})
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          login_users: username,
+          password_users: password
+        }),
+      });
 
-			const response = await fetch('http://localhost:3000/login', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					login_users: username,
-					password_users: password,
-				}),
-			})
+      const data = await response.json();
 
-			const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Ошибка авторизации');
+      }
 
-			console.log('Response received:', data)
+      if (!data.user) {
+        throw new Error('Неверный формат ответа сервера');
+      }
 
-			if (response.ok) {
-				console.log('Login successful:', data)
-				setSuccessMessage('Вход выполнен успешно!')
-				setError('') // Очищаем сообщение об ошибке
-				setTimeout(() => {
-					onLoginSuccess(data.user) // Передаем данные пользователя
-					onClose()
-				}, 2000) // Закрываем модальное окно через 2 секунды
-			} else {
-				setError('Неправильный логин или пароль')
-				setSuccessMessage('') // Очищаем сообщение об успехе
-			}
-		} catch (err) {
-			console.error('Error during login:', err)
-			setError('Произошла ошибка при входе')
-			setSuccessMessage('') // Очищаем сообщение об успехе
-		}
-	}
+      onLoginSuccess(data);
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Неверный логин или пароль');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-	return (
-		<div>
-			<Modal className='modal-auth' isOpen={isOpen} onClose={onClose}>
-				<div className='auth-div'>
-					<h2 className='auth-title'>Авторизация</h2>
-				</div>
-				{error && <div className='error'>{error}</div>}
-				{successMessage && <div className='success'>{successMessage}</div>}
-				<form onSubmit={handleSubmit}>
-					<div className='input-form-div'>
-						<div className='div-auth-suptitle'>Имя входа</div>
-						<input
-							className='input-auth'
-							type='text'
-							id='username'
-							value={username}
-							onChange={e => setUsername(e.target.value)}
-						/>
-					</div>
-					<div className='input-form-div'>
-						<div className='div-auth-suptitle-pass'>Пароль</div>
-						<input
-							className='input-auth'
-							type='password'
-							id='password'
-							value={password}
-							onChange={e => setPassword(e.target.value)}
-						/>
-					</div>
-					<div className='div-forget-checkbox'>
-						<input type='checkbox' className='checkbox-forget'></input>
-						<label>запомнить на сутки</label>
-					</div>
-					<div className='bottom-auth'>
-						<button className='sign-in-btn' type='submit'>
-							ВОЙТИ
-						</button>
-					</div>
-				</form>
-			</Modal>
-		</div>
-	)
-}
+  return (
+    <Modal className='modal-auth' isOpen={isOpen} onClose={onClose}>
+      <div className='auth-div'>
+        <h2 className='auth-title'>Авторизация</h2>
+      </div>
+      {error && <div className='error'>{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className='input-form-div'>
+          <div className='div-auth-suptitle'>Имя входа</div>
+          <input
+            className='input-auth'
+            type='text'
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            autoComplete="username"
+          />
+        </div>
+        <div className='input-form-div'>
+          <div className='div-auth-suptitle-pass'>Пароль</div>
+          <input
+            className='input-auth'
+            type='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+          />
+        </div>
+        <div className='div-forget-checkbox'>
+          <input type='checkbox' className='checkbox-forget' />
+          <label>запомнить на сутки</label>
+        </div>
+        <div className='bottom-auth'>
+          <button 
+            className='sign-in-btn' 
+            type='submit'
+            disabled={isLoading}
+          >
+            {isLoading ? 'Вход...' : 'ВОЙТИ'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
 
-export default LoginModal
+export default LoginModal;

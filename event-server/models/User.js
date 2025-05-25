@@ -1,26 +1,30 @@
-const { pool } = require("./db");
+// models/User.js
+const db = require('./db');
 
-const User = {
-  async getByCredentials(login, password) {
-    const { rows } = await pool.query(
-      "SELECT * FROM users WHERE login_users = $1 AND password_users = $2",
-      [login, password]
-    );
-    return rows[0] || null;
-  },
-
-  async getByDepartments(departmentIds) {
-    let query = "SELECT * FROM users";
-    let params = [];
-
-    if (departmentIds) {
-      query += " WHERE id_department = ANY($1::int[])";
-      params.push(departmentIds.split(",").map(Number));
+class User {
+  static async findByCredentials(login, password) {
+    try {
+      const { rows } = await db.query(
+        'SELECT * FROM users WHERE login_users = $1 AND password_users = $2',
+        [login, password]
+      );
+      return rows[0] || null;
+    } catch (error) {
+      throw error;
     }
+  }
 
-    const { rows } = await pool.query(query, params);
-    return rows;
-  },
-};
+  static async createUser(login, password, role = 'user') {
+    try {
+      const { rows } = await db.query(
+        'INSERT INTO users (login_users, password_users, user_role) VALUES ($1, $2, $3) RETURNING *',
+        [login, password, role]
+      );
+      return rows[0];
+    } catch (error) {
+      throw error;
+    }
+  }
+}
 
 module.exports = User;

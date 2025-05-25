@@ -1,96 +1,70 @@
 const { pool } = require("./db");
 
-const Event = {
-  async getAll(eventDate = null) {
-    let query = `
-      SELECT 
-        e.id,
-        e.title,
-        e.description,
-        e.event_type,
-        e.event_kind,
-        e.start_date,
-        e.end_date,
-        e.status,
-        COALESCE(ARRAY_AGG(u.login_users) FILTER (WHERE u.login_users IS NOT NULL), '{}') AS notified_users,
-        COALESCE(ARRAY_AGG(d.department_name) FILTER (WHERE d.department_name IS NOT NULL), '{}') AS departments
+class Event {
+  static async getAll() {
+    const { rows } = await pool.query(`
+      SELECT e.*, 
+      array_agg(DISTINCT d.id_department) as department_ids
       FROM events e
       LEFT JOIN event_departments ed ON e.id = ed.id_event
       LEFT JOIN departments d ON ed.id_department = d.id_department
-      LEFT JOIN users u ON u.id_user = ANY(e.notified_users)
-    `;
-    let params = [];
-
-    if (eventDate) {
-      query += " WHERE e.event_date = $1";
-      params.push(eventDate);
-    }
-
-    query += " GROUP BY e.id";
-
-    const { rows } = await pool.query(query, params);
+      GROUP BY e.id
+      ORDER BY e.start_date
+    `);
     return rows;
-  },
+  }
 
-  async getById(id) {
-    const { rows } = await pool.query("SELECT * FROM events WHERE id = $1", [
-      id,
-    ]);
+  static async getById(id) {
+    const { rows } = await pool.query(`
+      SELECT e.*, 
+      array_agg(DISTINCT d.id_department) as department_ids
+      FROM events e
+      LEFT JOIN event_departments ed ON e.id = ed.id_event
+      LEFT JOIN departments d ON ed.id_department = d.id_department
+      WHERE e.id = $1
+      GROUP BY e.id
+    `, [id]);
     return rows[0] || null;
-  },
+  }
 
-  async create(eventData) {
-    const {
-      title,
-      description,
-      event_type,
-      event_kind,
-      start_date,
-      end_date,
-      status,
-      departments,
-      notified_users,
-    } = eventData;
-
-    await pool.query("BEGIN");
-
-    const eventResult = await pool.query(
-      `INSERT INTO events (
-        title, description, event_type, event_kind, 
-        start_date, end_date, status, notified_users
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [
-        title,
-        description,
-        event_type,
-        event_kind,
-        start_date,
-        end_date,
-        status || true,
-        notified_users || [],
-      ]
-    );
-
-    const eventId = eventResult.rows[0].id;
-
-    for (const departmentId of departments) {
-      await pool.query(
-        "INSERT INTO event_departments (id_event, id_department) VALUES ($1, $2)",
-        [eventId, departmentId]
+  static async create({ title, description, start_date, end_date, departments = [] }) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      
+      const { rows } = await client.query(
+        `INSERT INTO events (title, description, start_date, end_date)
+         VALUES ($1, $2, $3, $4) RETURNING id`,
+        [title, description, start_date, end_date]
       );
+      
+      const eventId = rows[0].id;
+      
+      for (const deptId of departments) {
+        await client.query(
+          `INSERT INTO event_departments (id_event, id_department)
+           VALUES ($1, $2)`,
+          [eventId, deptId]
+        );
+      }
+      
+      await client.query('COMMIT');
+      return eventId;
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
     }
+  }
 
-    await pool.query("COMMIT");
-    return eventId;
-  },
-
-  async delete(id) {
-    const { rows } = await pool.query(
-      "DELETE FROM events WHERE id = $1 RETURNING *",
+  static async delete(id) {
+    const { rowCount } = await pool.query(
+      'DELETE FROM events WHERE id = $1',
       [id]
     );
-    return rows[0] || null;
-  },
-};
+    return rowCount > 0;
+  }
+}
 
 module.exports = Event;

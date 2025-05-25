@@ -16,10 +16,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../notific/build")));
 
 // Routes
-app.use("/events", eventsRoutes);
-app.use("/users", usersRoutes);
-app.use("/departments", departmentsRoutes);
-app.use("/login", authRoutes);
+app.use("/api/events", eventsRoutes);
+app.use("/api/users", usersRoutes);
+app.use("/api/departments", departmentsRoutes);
+app.use("/api/auth", authRoutes); // Changed from /login to /api/auth
 
 // Error handler
 app.use(errorHandler);
