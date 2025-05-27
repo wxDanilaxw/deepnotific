@@ -1,81 +1,65 @@
-const Event = require('../models/Event');
-const { validationResult } = require('express-validator');
+const Event = require("../models/Event");
 
 module.exports = {
-  getAllEvents: async (req, res, next) => {
+  getAllEvents: async (req, res) => {
     try {
+      console.log('Fetching all events');
       const events = await Event.getAll();
       res.json(events);
     } catch (err) {
-      next(err);
+      console.error('Error in getAllEvents:', err);
+      res.status(500).json({ error: err.message });
     }
   },
 
-  getEventById: async (req, res, next) => {
+  createEvent: async (req, res) => {
     try {
-      const event = await Event.getById(req.params.id);
-      if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-      res.json(event);
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  createEvent: async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
+      console.log('Creating event with data:', req.body);
       const eventId = await Event.create(req.body);
-      res.status(201).json({ 
-        message: 'Event created successfully',
+      res.json({ 
+        success: true,
         id: eventId
       });
     } catch (err) {
-      if (err.code === '23505') {
-        return res.status(400).json({ 
-          error: 'Event with this name and time already exists' 
-        });
-      }
-      next(err);
+      console.error('Error in createEvent:', err);
+      res.status(500).json({ 
+        error: err.message,
+        details: err.detail // Для PostgreSQL ошибок
+      });
     }
   },
 
-  updateEvent: async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
+  updateEvent: async (req, res) => {
     try {
+      console.log(`Updating event ${req.params.id} with:`, req.body);
       const updated = await Event.update(req.params.id, req.body);
-      if (!updated) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-      res.json({ message: 'Event updated successfully' });
+      res.json({ 
+        success: true,
+        updated
+      });
     } catch (err) {
-      if (err.code === '23505') {
-        return res.status(400).json({ 
-          error: 'Event with this name and time already exists' 
-        });
-      }
-      next(err);
+      console.error('Error in updateEvent:', err);
+      res.status(500).json({ 
+        error: err.message,
+        details: err.detail
+      });
     }
   },
 
-  deleteEvent: async (req, res, next) => {
+  deleteEvent: async (req, res) => {
     try {
+      console.log(`Deleting event ${req.params.id}`);
       const deleted = await Event.delete(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ error: 'Event not found' });
-      }
-      res.json({ message: 'Event deleted successfully' });
+      res.json({ 
+        success: true,
+        deleted
+      });
     } catch (err) {
-      next(err);
+      console.error('Error in deleteEvent:', err);
+      res.status(500).json({ 
+        error: err.message,
+        details: err.detail
+      });
     }
   }
 };

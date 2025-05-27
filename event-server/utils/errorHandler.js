@@ -8,15 +8,7 @@ module.exports = (err, req, res, next) => {
       details: err.errors 
     });
   }
-  
-  // Ошибки Multer (загрузка файлов)
-  if (err instanceof multer.MulterError) {
-    return res.status(400).json({ 
-      error: 'File upload error',
-      details: err.message 
-    });
-  }
-  
+    
   // Ошибки JWT
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({ 

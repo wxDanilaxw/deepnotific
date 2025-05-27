@@ -5,9 +5,10 @@ import {
   Route,
   Routes,
   Navigate,
+  Link
 } from "react-router-dom";
 import Main from "./pages/main";
-import AdminPage from "./pages/AdminPage";
+import EventsPage from "./components/EventComp/EventsPage";
 import "./App.css";
 
 const App = () => {
@@ -19,10 +20,19 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Main />} />
-        <Route
-          path="/adminpanel"
-          element={isAdmin() ? <AdminPage /> : <Navigate to="/" replace />}
+        <Route path="/" element={
+          <>
+            <Main />
+            {isAdmin() && (
+              <Link to="/events" className="events-button">
+                Управление событиями
+              </Link>
+            )}
+          </>
+        } />
+        <Route 
+          path="/events" 
+          element={isAdmin() ? <EventsPage /> : <Navigate to="/" replace />} 
         />
       </Routes>
     </Router>

@@ -5,7 +5,8 @@ import { format } from "date-fns";
 import "./AdminPage.css";
 import CreateEventModal from "../components/CreateEventModal";
 import EditEventModal from "../components/EditEventModal";
-
+import EventsPage from '../components/EventComp/EventsPage';
+import { Link } from 'react-router-dom';
 const AdminPage = () => {
   const [events, setEvents] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -16,51 +17,22 @@ const AdminPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [eventsRes, deptsRes] = await Promise.all([
-        axios.get("http://localhost:3000/events"),
-        axios.get("http://localhost:3000/departments"),
-      ]);
-      setEvents(eventsRes.data);
-      setDepartments(deptsRes.data);
-    } catch (err) {
-      setError("Ошибка загрузки данных");
-      console.error("Error fetching data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  
 
-  const handleDeleteEvent = async (id) => {
-    if (!window.confirm("Вы уверены, что хотите удалить это событие?")) return;
+  
 
-    try {
-      await axios.delete(`http://localhost:3000/events/${id}`);
-      setEvents((prev) => prev.filter((event) => event.id !== id));
-    } catch (err) {
-      setError("Ошибка при удалении события");
-      console.error("Error deleting event:", err);
-    }
-  };
-
-  const handleCreateSuccess = () => {
-    setIsCreateModalOpen(false);
-    fetchData();
-  };
-
-  if (loading) return <div className="loading-spinner">Загрузка...</div>;
-  if (error) return <div className="error-message">{error}</div>;
+ 
 
   return (
     <div className="admin-container">
       <div className="header-section">
         <h1 className="admin-title">Панель администратора</h1>
+        <Link to="/adminpanel/events" className="admin-menu-item">
+          Управление событиями
+        </Link>
+
         <button onClick={() => navigate("/")} className="close-panel-button">
           Закрыть панель
         </button>
@@ -133,7 +105,7 @@ const AdminPage = () => {
                       </button>
                       <button
                         className="button-event-edit delete"
-                        onClick={() => handleDeleteEvent(event.id)}
+                       
                       >
                         Удалить
                       </button>
@@ -153,7 +125,7 @@ const AdminPage = () => {
       <CreateEventModal
         isOpen={isCreateModalOpen}
         onRequestClose={() => setIsCreateModalOpen(false)}
-        onEventCreated={handleCreateSuccess}
+       
         departments={departments}
       />
 
@@ -161,7 +133,7 @@ const AdminPage = () => {
         <EditEventModal
           isOpen={isEditModalOpen}
           onRequestClose={() => setIsEditModalOpen(false)}
-          onEventUpdated={handleCreateSuccess}
+         
           event={selectedEvent}
           departments={departments}
         />
