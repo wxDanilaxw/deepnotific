@@ -61,6 +61,8 @@ class Event {
     const { rowCount } = await pool.query('DELETE FROM events WHERE id_event = $1', [id]);
     return rowCount > 0;
   }
+
+  
 }
 
 module.exports = Event;

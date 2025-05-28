@@ -11,27 +11,24 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
     try {
       const data = await login({ login: username, password });
       
-      if (!data.token || !data.user) {
-        throw new Error('Неверный формат ответа сервера');
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify({
+        id: data.user.id_user,
+        login: data.user.login_users,
+        role: data.user.user_role,
+        departmentId: data.user.id_department, // Важно сохранить ID отдела
+        departmentName: data.user.department_name // Для отображения
+      }));
       
       onLoginSuccess(data);
-      onClose();
     } catch (err) {
-      setError(err.message || 'Неверный логин или пароль');
-    } finally {
-      setIsLoading(false);
+      // Обработка ошибок
     }
   };
+    
+  
 
   return (
     <Modal className='modal-auth' isOpen={isOpen} onClose={onClose}>

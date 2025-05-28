@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { createEvent } from '../../api/eventApi';
+import './EditEventModal.css'
 
 const EventModal = ({ categories, departments, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
@@ -31,19 +32,19 @@ const EventModal = ({ categories, departments, onClose, onSuccess }) => {
 
   return (
     <div className="modal">
-      <div className="modal-content">
-        <h3>Создать событие</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Название:</label>
-            <input
-              type="text"
-              name="event_name"
-              value={formData.event_name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+    <div className="modal-content">
+      <h3>Создать событие</h3>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Название:</label>
+          <input
+            type="text"
+            name="event_name"
+            value={formData.event_name}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
           <div className="form-group">
             <label>Описание:</label>
@@ -134,9 +135,9 @@ const EventModal = ({ categories, departments, onClose, onSuccess }) => {
           </div>
 
           <div className="modal-actions">
-            <button type="button" onClick={onClose}>Отмена</button>
-            <button type="submit">Создать</button>
-          </div>
+        <button type="button" onClick={onClose}>Отмена</button>
+        <button type="submit">Создать</button>
+      </div>
         </form>
       </div>
     </div>

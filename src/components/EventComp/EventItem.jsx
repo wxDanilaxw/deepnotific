@@ -1,6 +1,6 @@
 import React from 'react';
 import { format } from 'date-fns';
-
+import './EventItem.css';
 const EventItem = ({ event, categories, departments, onEdit, onDelete }) => {
   const category = categories.find(c => c.id_category === event.id_category);
   const department = departments.find(d => d.id_department === event.id_department);

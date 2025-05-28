@@ -1,4 +1,7 @@
+import axios from "axios";
+
 const API_URL = 'http://localhost:3000/api';
+
 
 const handleResponse = async (response) => {
   if (!response.ok) {
@@ -41,6 +44,7 @@ export const createEvent = async (eventData) => {
   return handleResponse(response);
 };
 
+
 export const updateEvent = async (id, eventData) => {
   const token = localStorage.getItem('token');
   const response = await fetch(`${API_URL}/events/${id}`, {
@@ -63,4 +67,32 @@ export const deleteEvent = async (id) => {
     }
   });
   return handleResponse(response);
+
+
 };
+
+export const getEventsByDepartment = async (departmentId) => {
+    try {
+      const response = await axios.get(`/api/events/department/${departmentId}`);
+      return response.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.error || 'Ошибка при загрузке событий');
+    }
+  };
+
+
+  
+  export const markEventAsRead = async (userId, eventId) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/events/mark-read/${userId}/${eventId}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to mark as read');
+    }
+    return response.json();
+  };
