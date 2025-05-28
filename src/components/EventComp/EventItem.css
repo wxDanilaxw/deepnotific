@@ -1,116 +1,115 @@
 /* Общий контейнер карточки события */
 .event-card {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e9ecef;
-    padding: 22px 20px 18px 20px;
-    transition: box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .event-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
-  }
-  
-  /* Информация о событии */
-  .event-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    margin-bottom: 1.2rem;
-  }
-  
-  .event-info h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
-  }
-  
-  .event-info p {
-    font-size: 0.98rem;
-    color: #555;
-    margin: 0;
-    line-height: 1.4;
-  }
-  
-  .event-details {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .event-details > div {
-    font-size: 0.92rem;
-    color: #666;
-  }
-  
-  .event-details strong {
-    font-weight: 600;
-    color: #444;
-    margin-right: 0.3rem;
-  }
-  
-  /* Кнопки действий */
-  .event-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1.4rem;
-  }
-  
-  .event-actions button {
-    font-family: inherit;
-    font-size: 0.9rem;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    background: #6161fa;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
-    box-shadow: 0 2px 8px rgba(97, 97, 250, 0.15);
-  }
-  
-  .event-actions button:hover {
-    background: #4a4af5;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 10px rgba(97, 97, 250, 0.25);
-  }
-  
-  .event-actions button:last-child {
-    background: #f44336;
-  }
-  
-  .event-actions button:last-child:hover {
-    background: #d32f2f;
-  }
-  
-  /* Адаптивность */
-  @media (max-width: 768px) {
-    .event-card {
-      padding: 18px 16px 14px 16px;
-    }
-  
-    .event-info h3 {
-      font-size: 1.1rem;
-    }
-  
-    .event-actions {
-      margin-top: 1rem;
-      justify-content: flex-start;
-    }
-  
-    .event-actions button {
-      font-size: 0.8rem;
-      padding: 0.5rem 1rem;
-    }
-  }
-  
+	background: #fff;
+	border-radius: 20px;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+	border: 1px solid #f10303;
+	padding: 22px 20px 18px 20px;
+	transition: box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	position: relative;
+	overflow: hidden;
+}
+
+.event-card:hover {
+	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+	transform: translateY(-2px);
+}
+
+/* Информация о событии */
+.event-info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	margin-bottom: 1.2rem;
+}
+
+.event-info h3 {
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: #333;
+	margin: 0;
+}
+
+.event-info p {
+	font-size: 0.98rem;
+	color: #555;
+	margin: 0;
+	line-height: 1.4;
+}
+
+.event-details {
+	margin-top: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.event-details > div {
+	font-size: 0.92rem;
+	color: #666;
+}
+
+.event-details strong {
+	font-weight: 600;
+	color: #444;
+	margin-right: 0.3rem;
+}
+
+/* Кнопки действий */
+.event-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1rem;
+	margin-top: 1.4rem;
+}
+
+.event-actions button {
+	font-family: inherit;
+	font-size: 0.9rem;
+	padding: 0.6rem 1.2rem;
+	border: none;
+	border-radius: 6px;
+	background: #6161fa;
+	color: #fff;
+	cursor: pointer;
+	transition: background 0.2s ease, transform 0.1s ease;
+	box-shadow: 0 2px 8px rgba(97, 97, 250, 0.15);
+}
+
+.event-actions button:hover {
+	background: #4a4af5;
+	transform: translateY(-1px);
+	box-shadow: 0 3px 10px rgba(97, 97, 250, 0.25);
+}
+
+.event-actions button:last-child {
+	background: #f44336;
+}
+
+.event-actions button:last-child:hover {
+	background: #d32f2f;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+	.event-card {
+		padding: 18px 16px 14px 16px;
+	}
+
+	.event-info h3 {
+		font-size: 1.1rem;
+	}
+
+	.event-actions {
+		margin-top: 1rem;
+		justify-content: flex-start;
+	}
+
+	.event-actions button {
+		font-size: 0.8rem;
+		padding: 0.5rem 1rem;
+	}
+}
